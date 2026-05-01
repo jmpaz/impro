@@ -57,7 +57,7 @@ function replyToTemplate({ post }) {
             ${post.record.text
               ? html`<div class="post-text">
                   ${richTextTemplate({
-                    text: post.record.text.trimEnd(),
+                    text: post.record.text,
                     facets: post.record.facets,
                   })}
                 </div>`

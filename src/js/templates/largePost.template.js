@@ -103,7 +103,7 @@ export function largePostTemplate({
   ) {
     return unavailablePostTemplate();
   }
-  const postText = post.record.text?.trimEnd() || "";
+  const postText = post.record.text || "";
   const badgeLabels = post.badgeLabels ?? [];
   const contentLabel = post.contentLabel;
   // Instead of hiding, add the content label to the badge labels

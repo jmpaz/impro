@@ -139,7 +139,7 @@ export function quotedPostTemplate({
       mutedLabel += " (Account)";
     }
   }
-  const postText = quotedPost.value.text?.trimEnd() || "";
+  const postText = quotedPost.value.text || "";
   return html`<div
     class="quoted-post-link"
     role="link"

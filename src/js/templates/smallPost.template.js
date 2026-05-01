@@ -69,7 +69,7 @@ export function smallPostTemplate({
     !isAuthenticated &&
     post.author &&
     doHideAuthorOnUnauthenticated(post.author);
-  const postText = post.record.text?.trimEnd() || "";
+  const postText = post.record.text || "";
   const content = html`
     <div
       class="post small-post clickable"
