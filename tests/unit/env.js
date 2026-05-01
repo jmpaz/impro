@@ -17,6 +17,7 @@ globalThis.Node = dom.window.Node;
 globalThis.DocumentFragment = dom.window.DocumentFragment;
 globalThis.Event = dom.window.Event;
 globalThis.KeyboardEvent = dom.window.KeyboardEvent;
+globalThis.getComputedStyle = dom.window.getComputedStyle;
 
 // Mock requestAnimationFrame
 globalThis.requestAnimationFrame = (callback) => setTimeout(callback, 0);
