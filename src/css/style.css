@@ -6158,6 +6158,16 @@ moderation-warning .toggle-content {
   min-height: 30vh;
 }
 
+.app-error-state {
+  min-height: 100vh;
+  justify-content: center;
+  padding: 16px;
+}
+
+.app-error-state[hidden] {
+  display: none;
+}
+
 .splash-screen {
   display: flex;
   flex-direction: column;
@@ -6166,10 +6176,11 @@ moderation-warning .toggle-content {
   height: 100vh;
 }
 
-.splash-screen h1 {
-  font-size: 48px;
-  font-weight: 600;
-  color: var(--text-color-muted);
+.splash-screen .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  border-top-color: var(--text-color-muted);
 }
 
 .list-item {
