@@ -207,9 +207,11 @@ test.describe("Post thread view", () => {
     const largePost = view.locator('[data-testid="large-post"]');
     await expect(largePost).toBeVisible({ timeout: 10000 });
 
-    await largePost.locator("like-button").click();
+    await largePost.locator('[data-testid="like-button"]').click();
 
-    await expect(largePost.locator("like-button .liked")).toBeVisible({
+    await expect(
+      largePost.locator('[data-testid="like-button"].active'),
+    ).toBeVisible({
       timeout: 10000,
     });
   });
@@ -268,7 +270,7 @@ test.describe("Post thread view", () => {
     await largePost.locator('[data-testid="bookmark-button"]').click();
 
     await expect(
-      largePost.locator('[data-testid="bookmark-button"].bookmarked'),
+      largePost.locator('[data-testid="bookmark-button"].active'),
     ).toBeVisible({ timeout: 10000 });
   });
 

@@ -1974,7 +1974,7 @@ body.scroll-locked header {
   padding-bottom: 7px;
 }
 
-like-button {
+animated-button {
   display: contents;
 }
 
@@ -1996,18 +1996,18 @@ like-button {
   stroke: var(--highlight-color);
 }
 
-.post-action-button.like-button .heart-icon {
+.post-action-button.animated-button .heart-icon {
   width: 19.5px;
   height: 19.5px;
   top: 0.75px;
   left: 2px;
 }
 
-.post-action-button.like-button .post-action-count {
+.post-action-button.animated-button .post-action-count {
   left: 1px;
 }
 
-.like-button.liked .heart-icon path {
+.like-button.active .heart-icon path {
   stroke: var(--like-color);
   fill: var(--like-color);
 }
@@ -2033,11 +2033,11 @@ like-button {
   left: 2px;
 }
 
-.post-action-button.bookmarked .bookmark-icon {
+.bookmark-button.active .bookmark-icon {
   color: var(--highlight-color);
 }
 
-.post-action-button.bookmarked .bookmark-icon path {
+.bookmark-button.active .bookmark-icon path {
   fill: var(--highlight-color);
   stroke: var(--highlight-color);
 }
@@ -2070,11 +2070,15 @@ like-button {
   stroke-width: 1.8;
 }
 
-.like-button.liked {
+.like-button.active {
   color: var(--like-color);
 }
 
-.like-button .post-action-icon::after {
+.bookmark-button.active {
+  color: var(--highlight-color);
+}
+
+.animated-button .post-action-icon::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -2082,14 +2086,14 @@ like-button {
   width: 0;
   height: 0;
   border-radius: 50%;
-  border: 2px solid var(--like-color);
-  background-color: var(--like-color);
+  border: 2px solid currentColor;
+  background-color: currentColor;
   transform: translate(-50%, -50%);
   opacity: 0;
   pointer-events: none;
 }
 
-.like-button.liked.animating .post-action-icon::after {
+.animated-button.animating .post-action-icon::after {
   animation: ripple-out 0.3s ease-out;
 }
 

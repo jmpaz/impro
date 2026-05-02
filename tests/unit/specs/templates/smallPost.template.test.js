@@ -79,10 +79,12 @@ t.describe("smallPostTemplate", (it) => {
       ...baseProps,
     });
     const container = document.createElement("div");
+    document.body.appendChild(container);
     render(result, container);
     assert(container.querySelector("[data-testid='reply-button']") !== null);
     assert(container.querySelector("[data-testid='repost-button']") !== null);
     assert(container.querySelector("[data-testid='bookmark-button']") !== null);
+    container.remove();
   });
 });
 
