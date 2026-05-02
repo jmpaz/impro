@@ -242,7 +242,7 @@ export function profileCardTemplate({
             <context-menu-item
               @click=${() => {
                 navigator.clipboard.writeText(getPermalinkForProfile(profile));
-                showToast("Link copied to clipboard");
+                showToast("Link copied to clipboard", { style: "success" });
               }}
             >
               Copy link to profile

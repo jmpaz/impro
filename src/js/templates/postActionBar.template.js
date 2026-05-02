@@ -190,7 +190,7 @@ export function postActionBarTemplate({
             <context-menu-item
               @click=${() => {
                 navigator.clipboard.writeText(getPermalinkForPost(post));
-                showToast("Link copied to clipboard");
+                showToast("Link copied to clipboard", { style: "success" });
               }}
             >
               Copy link to post
@@ -202,7 +202,9 @@ export function postActionBarTemplate({
                       navigator.clipboard.writeText(
                         richTextToString(post.record.text, post.record.facets),
                       );
-                      showToast("Post text copied to clipboard");
+                      showToast("Post text copied to clipboard", {
+                        style: "success",
+                      });
                     }}
                   >
                     Copy post text

@@ -42,13 +42,15 @@ class IntersectionObserver {
 }
 globalThis.IntersectionObserver = IntersectionObserver;
 
-// Mock HTMLDialogElement methods (not implemented in JSDOM)
 globalThis.window.HTMLDialogElement.prototype.showModal = function () {
   this.setAttribute("open", "");
 };
 globalThis.window.HTMLDialogElement.prototype.close = function () {
   this.removeAttribute("open");
 };
+
+globalThis.window.HTMLElement.prototype.showPopover = function () {};
+globalThis.window.HTMLElement.prototype.hidePopover = function () {};
 
 // Prevent network requests. We can mock this in individual tests as needed.
 delete globalThis.fetch;

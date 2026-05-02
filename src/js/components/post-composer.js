@@ -348,7 +348,7 @@ class PostComposer extends Component {
     const remainingSlots = maxImages - this._selectedImages.length;
 
     if (files.length > remainingSlots) {
-      showToast("You can select up to 4 images in total");
+      showToast("You can select up to 4 images in total", { style: "warning" });
     }
 
     for (let i = 0; i < Math.min(files.length, remainingSlots); i++) {

@@ -5235,9 +5235,35 @@ context-menu-item-group:not(:last-child) .context-menu-item-group {
   opacity: 1;
 }
 
+.toast.success {
+  background: light-dark(
+    color-mix(in srgb, var(--highlight-color) 8%, var(--white)),
+    color-mix(in srgb, var(--highlight-color) 8%, var(--mid-gray))
+  );
+  border-color: color-mix(in srgb, var(--highlight-color) 30%, transparent);
+  color: var(--highlight-color);
+}
+
 .toast.error {
-  background: var(--error-color);
-  color: var(--white);
+  background: light-dark(
+    color-mix(in srgb, var(--error-color) 12%, var(--white)),
+    color-mix(in srgb, var(--error-color) 12%, var(--mid-gray))
+  );
+  border-color: color-mix(in srgb, var(--error-color) 30%, transparent);
+  color: var(--error-color);
+}
+
+.toast.warning {
+  background: light-dark(
+    color-mix(in srgb, var(--warning-color) 12%, var(--white)),
+    color-mix(in srgb, var(--warning-color) 12%, var(--mid-gray))
+  );
+  border-color: color-mix(in srgb, var(--warning-color) 30%, transparent);
+  color: var(--warning-color);
+}
+
+.toast.warning .toast-icon {
+  color: var(--warning-color);
 }
 
 @media (min-width: 800px) {
