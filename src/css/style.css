@@ -256,19 +256,10 @@ a {
   color: inherit;
 }
 
-/* a:hover {
-  text-decoration: none;
-  color: inherit;
-} */
-/* a:visited {
-  color: inherit;
-} */
-
 hr {
-  border-bottom: var(--hair) solid var(--post-border-color);
-  border-top: none;
-  border-right: none;
-  border-left: none;
+  border: none;
+  height: var(--hair);
+  background-color: var(--post-border-color);
 }
 
 /* visually hide alt text */
@@ -1447,7 +1438,9 @@ body.scroll-locked header {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  border-bottom: var(--hair) solid var(--post-border-color);
+  /* use box-shadow because border renders inconsistently on ios safari */
+  box-shadow: 0 var(--hair) 0 var(--post-border-color);
+  margin-bottom: var(--hair);
 }
 
 .post-list {
