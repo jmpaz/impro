@@ -8,12 +8,12 @@ import { externalLinkTemplate } from "/js/templates/externalLink.template.js";
 import { avatarTemplate } from "/js/templates/avatar.template.js";
 import { infoIconTemplate } from "/js/templates/icons/infoIcon.template.js";
 import { richTextTemplate } from "/js/templates/richText.template.js";
-import { parseEmbedPlayerFromUrl } from "/js/lib/embed-player.js";
 import { postHeaderTextTemplate } from "/js/templates/postHeaderText.template.js";
 import { postLabelsTemplate } from "/js/templates/postLabels.template.js";
 import { linkToPost, linkToFeed } from "/js/navigation.js";
 import { moderationWarningTemplate } from "/js/templates/moderationWarning.template.js";
-import { OG_CARD_SERVICE_URL } from "/js/config.js";
+import { OG_CARD_SERVICE_URL, TENOR_GIF_PROXY_URL } from "/js/config.js";
+import { isSafari } from "/js/utils.js";
 import "/js/components/lightbox-image-group.js";
 import "/js/components/streaming-video.js";
 import "/js/components/gif-player.js";
@@ -262,14 +262,36 @@ function tenorPlayerTemplate({ uri, alt }) {
   </div>`;
 }
 
+function isTenorGifUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.hostname !== "media.tenor.com") return false;
+    const [_, id, filename] = parsedUrl.pathname.split("/");
+    return Boolean(id && filename && id.includes("AAAAC"));
+  } catch {
+    return false;
+  }
+}
+
+// https://github.com/bluesky-social/social-app/blob/main/src/lib/strings/embed-player.ts
+function getTenorGifPlayerUri(url) {
+  const parsedUrl = new URL(url);
+  let [_, id, filename] = parsedUrl.pathname.split("/");
+  if (isSafari()) {
+    id = id.replace("AAAAC", "AAAP1");
+    filename = filename.replace(".gif", ".mp4");
+  } else {
+    id = id.replace("AAAAC", "AAAP3");
+    filename = filename.replace(".gif", ".webm");
+  }
+  return `${TENOR_GIF_PROXY_URL}/${id}/${filename}`;
+}
+
 function externalTemplate({ external, lazyLoadImages }) {
-  const embedPlayer = parseEmbedPlayerFromUrl(external.uri);
-  // todo: other embed players
-  if (embedPlayer && embedPlayer.type === "tenor_gif") {
+  if (isTenorGifUrl(external.uri)) {
     return tenorPlayerTemplate({
-      uri: embedPlayer.playerUri,
+      uri: getTenorGifPlayerUri(external.uri),
       alt: external.description,
-      lazyLoad: lazyLoadImages,
     });
   }
   return externalLinkTemplate({

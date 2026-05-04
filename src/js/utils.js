@@ -22,6 +22,8 @@ export function unique(array, { by: keyOrFn } = {}) {
 
 export const isDev = () => window.location.hostname === "localhost";
 export const isNative = () => Capacitor.isNativePlatform();
+export const isSafari = () =>
+  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 export function sortBy(array, fnOrKey, { direction = "asc" } = {}) {
   let fn = fnOrKey;
