@@ -1206,6 +1206,12 @@ body.scroll-locked header {
   }
 }
 
+button.sidebar-plugin-nav-item {
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+
 .sidebar-spacer {
   flex: 1;
 }

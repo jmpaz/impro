@@ -22,6 +22,27 @@ import {
 } from "/js/navigation.js";
 import "/js/components/animated-sidebar.js";
 import { showInfoModal } from "/js/modals.js";
+import { getPluginIconTemplate } from "/js/plugins/pluginRendering.js";
+
+function pluginSidebarIconTemplate({ entry }) {
+  const iconTemplate = getPluginIconTemplate(entry.icon);
+  return html`
+    <button
+      class="sidebar-nav-item sidebar-plugin-nav-item"
+      title=${entry.title}
+      @click=${(event) => {
+        const sidebar = event.currentTarget.closest("animated-sidebar");
+        if (sidebar) sidebar.close();
+        entry.invoke();
+      }}
+    >
+      <span class="sidebar-nav-icon"
+        >${iconTemplate ? iconTemplate() : ""}</span
+      >
+      <span class="sidebar-nav-label">${entry.title}</span>
+    </button>
+  `;
+}
 
 function showAboutModal() {
   showInfoModal({
@@ -38,7 +59,12 @@ function showAboutModal() {
   });
 }
 
-function sidebarNavTemplate({ menuItems, activeNavItem, onClickActiveItem }) {
+function sidebarNavTemplate({
+  menuItems,
+  activeNavItem,
+  onClickActiveItem,
+  pluginSidebarIcons = [],
+}) {
   return html`
     <nav class="sidebar-nav" data-testid="sidebar-nav">
       ${menuItems.map(
@@ -77,11 +103,16 @@ function sidebarNavTemplate({ menuItems, activeNavItem, onClickActiveItem }) {
           </a>
         `,
       )}
+      ${pluginSidebarIcons.map((entry) => pluginSidebarIconTemplate({ entry }))}
     </nav>
   `;
 }
 
-function loggedOutSidebarTemplate({ activeNavItem, onClickActiveItem }) {
+function loggedOutSidebarTemplate({
+  activeNavItem,
+  onClickActiveItem,
+  pluginSidebarIcons,
+}) {
   const menuItems = [
     {
       id: "home",
@@ -104,7 +135,12 @@ function loggedOutSidebarTemplate({ activeNavItem, onClickActiveItem }) {
       <div class="sidebar-header">
         <a href="/" class="sidebar-title"><h1>IMPRO</h1></a>
       </div>
-      ${sidebarNavTemplate({ menuItems, activeNavItem, onClickActiveItem })}
+      ${sidebarNavTemplate({
+        menuItems,
+        activeNavItem,
+        onClickActiveItem,
+        pluginSidebarIcons,
+      })}
       <a
         href=${linkToLogin()}
         class="square-button primary-button login-button"
@@ -141,9 +177,14 @@ export function sidebarTemplate({
   numChatNotifications = 0,
   onClickActiveItem,
   onClickComposeButton,
+  pluginSidebarIcons = [],
 }) {
   if (!isAuthenticated) {
-    return loggedOutSidebarTemplate({ activeNavItem, onClickActiveItem });
+    return loggedOutSidebarTemplate({
+      activeNavItem,
+      onClickActiveItem,
+      pluginSidebarIcons,
+    });
   }
 
   const menuItems = [
@@ -266,7 +307,12 @@ export function sidebarTemplate({
         </div>
       </div>
       <div class="sidebar-divider"></div>
-      ${sidebarNavTemplate({ menuItems, activeNavItem, onClickActiveItem })}
+      ${sidebarNavTemplate({
+        menuItems,
+        activeNavItem,
+        onClickActiveItem,
+        pluginSidebarIcons,
+      })}
       ${onClickComposeButton
         ? html`<button
             class="sidebar-compose-button"

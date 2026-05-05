@@ -457,3 +457,13 @@ export class ImageLoader {
     this._loading.clear();
   }
 }
+
+export class SimpleUUID {
+  constructor() {
+    this._id = 0;
+  }
+
+  create() {
+    return this._id++;
+  }
+}
