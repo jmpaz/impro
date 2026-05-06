@@ -34,6 +34,7 @@ class PostThreadView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     const { handleOrDid, rkey } = params;
@@ -493,6 +494,7 @@ class PostThreadView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             children: html`${headerTemplate({ title: "Post" })}
               <main>
                 ${(() => {

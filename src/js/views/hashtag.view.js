@@ -19,6 +19,7 @@ class HashtagView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -96,6 +97,7 @@ class HashtagView extends View {
             numChatNotifications,
             currentUser,
             activeNavItem: null,
+            pluginService,
             children: html` <main>
               ${headerTemplate({ title: `#${hashtag}` })}
               <div class="hashtag-tab-bar-container">

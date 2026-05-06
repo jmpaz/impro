@@ -31,6 +31,7 @@ class ProfileView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     const defaultAuthorFeeds = [
@@ -457,6 +458,7 @@ class ProfileView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             showSidebarOverlay: false,
             activeNavItem: currentUser?.did === profile?.did ? "profile" : null,
             onClickActiveNavItem: () => {

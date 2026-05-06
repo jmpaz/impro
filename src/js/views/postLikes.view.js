@@ -20,6 +20,7 @@ class PostLikesView extends View {
       chatNotificationService,
       postComposerService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     const { handleOrDid, rkey } = params;
@@ -98,6 +99,7 @@ class PostLikesView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             children: html`${headerTemplate({
                 title: "Liked by",
                 subtitle,

@@ -27,6 +27,7 @@ class FeedDetailView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -84,6 +85,7 @@ class FeedDetailView extends View {
             currentUser,
             showSidebarOverlay: false,
             activeNavItem: null,
+            pluginService,
             children: html`${headerTemplate({
                 title: feedName,
                 subtitle: feedAuthorHandle ? `@${feedAuthorHandle}` : "",

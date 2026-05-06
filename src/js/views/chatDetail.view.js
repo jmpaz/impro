@@ -52,6 +52,7 @@ class ChatDetailView extends View {
       chatNotificationService,
       identityResolver,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -635,6 +636,7 @@ class ChatDetailView extends View {
             showSidebarOverlay: false,
             onClickComposeButton: () =>
               postComposerService.composePost({ currentUser }),
+            pluginService,
             children: html`
               ${headerTemplate({
                 avatarTemplate: () => {

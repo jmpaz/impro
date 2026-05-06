@@ -20,6 +20,7 @@ class PostQuotesView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     const { handleOrDid, rkey } = params;
@@ -113,6 +114,7 @@ class PostQuotesView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             children: html`${headerTemplate({
                 title: "Quotes",
                 subtitle,

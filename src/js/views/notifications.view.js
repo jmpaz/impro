@@ -39,6 +39,7 @@ class NotificationsView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -735,6 +736,7 @@ class NotificationsView extends View {
             showFloatingComposeButton: true,
             onClickComposeButton: () =>
               postComposerService.composePost({ currentUser }),
+            pluginService,
             children: html`
               ${headerTemplate({
                 title: "Notifications",

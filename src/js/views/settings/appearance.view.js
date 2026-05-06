@@ -18,6 +18,7 @@ class SettingsAppearanceView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -56,6 +57,7 @@ class SettingsAppearanceView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             activeNavItem: "settings",
             onClickActiveNavItem: () => window.router.go("/settings"),
             children: html`${headerTemplate({

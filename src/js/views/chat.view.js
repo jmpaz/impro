@@ -21,6 +21,7 @@ class ChatView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -178,6 +179,7 @@ class ChatView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             activeNavItem: "chat",
             onClickActiveNavItem: async () => {
               window.scrollTo(0, 0);

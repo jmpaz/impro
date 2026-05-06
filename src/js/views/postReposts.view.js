@@ -21,6 +21,7 @@ class PostRepostsView extends View {
       chatNotificationService,
       postComposerService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     const { handleOrDid, rkey } = params;
@@ -98,6 +99,7 @@ class PostRepostsView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             children: html`${headerTemplate({
                 title: "Reposted by",
                 subtitle,

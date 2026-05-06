@@ -18,6 +18,7 @@ class SettingsView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -59,6 +60,7 @@ class SettingsView extends View {
             numChatNotifications,
             activeNavItem: "settings",
             onClickActiveNavItem: () => window.scrollTo(0, 0),
+            pluginService,
             children: html`${headerTemplate({
                 title: "Settings",
               })}

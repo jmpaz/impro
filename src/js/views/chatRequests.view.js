@@ -17,6 +17,7 @@ class ChatRequestsView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -188,6 +189,7 @@ class ChatRequestsView extends View {
             },
             onClickComposeButton: () =>
               postComposerService.composePost({ currentUser }),
+            pluginService,
             children: html`
               ${headerTemplate({
                 title: "Chat requests",

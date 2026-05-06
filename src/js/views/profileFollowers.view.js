@@ -20,6 +20,7 @@ class ProfileFollowersView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -102,6 +103,7 @@ class ProfileFollowersView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             children: html`${headerTemplate({
                 title: profile ? getDisplayName(profile) : "",
                 subtitle,

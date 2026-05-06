@@ -25,6 +25,7 @@ class SearchView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     const state = {
@@ -379,6 +380,7 @@ class SearchView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             activeNavItem: "search",
             onClickComposeButton: () =>
               postComposerService.composePost({ currentUser }),

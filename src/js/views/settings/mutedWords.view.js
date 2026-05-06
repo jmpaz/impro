@@ -17,6 +17,7 @@ class SettingsMutedWordsView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -254,6 +255,7 @@ class SettingsMutedWordsView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            pluginService,
             activeNavItem: "settings",
             onClickActiveNavItem: () => window.router.go("/settings"),
             children: html`${headerTemplate({

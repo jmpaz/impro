@@ -2,7 +2,6 @@ import { html } from "/js/lib/lit-html.js";
 import { sidebarTemplate } from "/js/templates/sidebar.template.js";
 import { footerTemplate } from "/js/templates/footer.template.js";
 import { editIconTemplate } from "/js/templates/icons/editIcon.template.js";
-import { pluginService } from "/js/plugins/pluginService.js";
 import "/js/components/animated-sidebar.js";
 
 function defaultOnClickComposeButton() {
@@ -20,6 +19,7 @@ export function mainLayoutTemplate({
   showFloatingComposeButton = false,
   onClickComposeButton = defaultOnClickComposeButton,
   showSidebarOverlay = true,
+  pluginService,
 }) {
   // This fixes a weird performance bug that was happening on the postThread view
   // (specifically with the profile image)

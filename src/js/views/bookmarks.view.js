@@ -17,6 +17,7 @@ class BookmarksView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -57,6 +58,7 @@ class BookmarksView extends View {
             numChatNotifications,
             currentUser,
             activeNavItem: "bookmarks",
+            pluginService,
             children: html`
               ${headerTemplate({ title: "Saved Posts" })}
               <main>

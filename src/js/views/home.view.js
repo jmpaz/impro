@@ -21,6 +21,7 @@ class HomeView extends View {
       postComposerService,
       reportService,
       isAuthenticated,
+      pluginService,
     },
   }) {
     function createPersistedState(namespace) {
@@ -213,6 +214,7 @@ class HomeView extends View {
             showFloatingComposeButton: true,
             onClickComposeButton: () =>
               postComposerService.composePost({ currentUser }),
+            pluginService,
             children: html` ${headerTemplate({
                 leftButton: "menu",
                 onClickMenuButton: () => handleMenuClick(),

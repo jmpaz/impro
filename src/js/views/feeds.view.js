@@ -13,6 +13,7 @@ class FeedsView extends View {
       notificationService,
       chatNotificationService,
       postComposerService,
+      pluginService,
     },
   }) {
     await requireAuth();
@@ -33,6 +34,7 @@ class FeedsView extends View {
             activeNavItem: "feeds",
             numNotifications,
             numChatNotifications,
+            pluginService,
             onClickActiveNavItem: () => {
               window.scrollTo(0, 0);
             },
