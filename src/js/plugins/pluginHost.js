@@ -149,15 +149,13 @@ export class PluginHost {
     this.uuid = new SimpleUUID();
   }
 
-  async loadEnabledPlugins({ enabledIds } = {}) {
+  async loadEnabledPlugins({ enabledIds = [] } = {}) {
     const availablePlugins = await this._fetchPluginIndex();
     this.logger.info(
       `discovered ${availablePlugins.length} plugin(s):`,
       availablePlugins,
     );
-    const toLoad = enabledIds
-      ? availablePlugins.filter((id) => enabledIds.includes(id))
-      : availablePlugins;
+    const toLoad = availablePlugins.filter((id) => enabledIds.includes(id));
     if (enabledIds) {
       const skipped = availablePlugins.filter((id) => !enabledIds.includes(id));
       if (skipped.length)

@@ -5636,11 +5636,17 @@ img[data-lightbox] {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  gap: 6px;
 }
 
 .muted-word-add-button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.button-plus-icon {
+  position: relative;
+  bottom: 1px;
 }
 
 .muted-word-add-button .loading-spinner {

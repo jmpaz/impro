@@ -351,7 +351,8 @@ class SettingsMutedWordsView extends View {
                   >
                     ${state.isSaving
                       ? html`<div class="loading-spinner"></div>`
-                      : "Add"}
+                      : html`<span>Add</span
+                          ><span class="button-plus-icon">+</span>`}
                   </button>
                   ${state.error
                     ? html`<div
