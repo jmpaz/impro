@@ -290,6 +290,12 @@ export class PluginHost {
     }
   }
 
+  dispatchNodeEvent(pluginId, handlerId) {
+    const instance = this._loadedPlugins.get(pluginId);
+    if (!instance) return;
+    return this._callPlugin(instance, "nodeEvent", handlerId, []);
+  }
+
   sendNotification(pluginId, notificationType, eventData = {}) {
     const instance = this._loadedPlugins.get(pluginId);
     if (!instance) return;

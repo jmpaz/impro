@@ -1,4 +1,4 @@
-import { renderNode, isEmptyNode } from "./pluginRendering.js";
+import { PluginRenderer, isEmptyNode } from "./pluginRenderer.js";
 
 // key -> { dialog, content, isOpen, dismiss }
 const dialogs = new Map();
@@ -8,6 +8,8 @@ function dialogKey(pluginId, modalId) {
 }
 
 export function setupPluginModals(pluginHost) {
+  const renderer = new PluginRenderer(pluginHost);
+
   pluginHost.registerHostCall("openModal", ({ pluginId, args }) => {
     const [options] = args;
     if (!options || options.modalId == null) return;
@@ -51,14 +53,16 @@ export function setupPluginModals(pluginHost) {
 
     entry.content.replaceChildren();
     if (!isEmptyNode(options.title)) {
-      const title = renderNode(options.title, pluginId);
+      const title = renderer.renderNode(options.title, pluginId);
       title.classList.add("modal-dialog-title");
       entry.content.appendChild(title);
     }
-    if (!isEmptyNode(options.content)) {
-      const body = renderNode(options.content, pluginId);
-      body.classList.add("modal-dialog-message");
-      entry.content.appendChild(body);
+    if (options.content?.children?.length) {
+      for (const childNode of options.content.children) {
+        entry.content.appendChild(renderer.renderNode(childNode, pluginId));
+      }
+    } else if (!isEmptyNode(options.content)) {
+      entry.content.appendChild(renderer.renderNode(options.content, pluginId));
     }
 
     entry.isOpen = true;

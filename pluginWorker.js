@@ -64,7 +64,7 @@ export class Modal {
   constructor() {
     this._modalId = uuid.create();
     this.contentEl = new VirtualEl("div");
-    this.titleEl = new VirtualEl("div");
+    this.titleEl = new VirtualEl("h2");
   }
 
   open() {
@@ -105,6 +105,14 @@ class VirtualEl {
     this.attrs = {};
     this.text = null;
     this.children = [];
+    this.events = {};
+  }
+
+  onClick(fn) {
+    const handlerId = uuid.create();
+    handlers.set(handlerId, fn);
+    this.events.click = handlerId;
+    return this;
   }
 
   setText(text) {
@@ -129,17 +137,26 @@ class VirtualEl {
     return this;
   }
 
-  createEl(tag, options = {}) {
+  createEl(tag, options = {}, callback) {
     const child = new VirtualEl(tag);
     if (options.text != null) child.text = options.text;
-    if (options.cls) child.attrs.class = options.cls;
+    if (options.cls) {
+      child.attrs.class = Array.isArray(options.cls)
+        ? options.cls.join(" ")
+        : options.cls;
+    }
     if (options.attr) Object.assign(child.attrs, options.attr);
     this.children.push(child);
+    if (typeof callback === "function") callback(child);
     return child;
   }
 
-  createDiv(options = {}) {
-    return this.createEl("div", options);
+  createDiv(options = {}, callback) {
+    return this.createEl("div", options, callback);
+  }
+
+  createSpan(options = {}, callback) {
+    return this.createEl("span", options, callback);
   }
 
   _serialize() {
@@ -148,6 +165,7 @@ class VirtualEl {
       attrs: this.attrs,
       text: this.text,
       children: this.children.map((child) => child._serialize()),
+      events: this.events,
     };
   }
 }
