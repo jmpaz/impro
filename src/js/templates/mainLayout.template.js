@@ -38,7 +38,7 @@ export function mainLayoutTemplate({
               numChatNotifications,
               onClickActiveItem: onClickActiveNavItem,
               onClickComposeButton,
-              pluginSidebarIcons: pluginService.getSidebarIcons(),
+              pluginSidebarItems: pluginService.getSidebarItems(),
             })
           : ""}
       </div>

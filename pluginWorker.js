@@ -26,12 +26,12 @@ export class Plugin {
   //   });
   // }
 
-  addSidebarIcon(icon, title, callback) {
+  addSidebarItem(icon, title, callback) {
     const handlerId = uuid.create();
     handlers.set(handlerId, callback);
     self.postMessage({
       type: "register",
-      target: "sidebarIcon",
+      target: "sidebarItem",
       icon,
       title,
       handlerId,

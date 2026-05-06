@@ -24,7 +24,7 @@ import "/js/components/animated-sidebar.js";
 import { showInfoModal } from "/js/modals.js";
 import { PluginRenderer } from "/js/plugins/pluginRenderer.js";
 
-function pluginSidebarIconTemplate({ entry }) {
+function pluginSidebarItemTemplate({ entry }) {
   const iconTemplate = PluginRenderer.getPluginIconTemplate(entry.icon);
   return html`
     <button
@@ -63,7 +63,7 @@ function sidebarNavTemplate({
   menuItems,
   activeNavItem,
   onClickActiveItem,
-  pluginSidebarIcons = [],
+  pluginSidebarItems = [],
 }) {
   return html`
     <nav class="sidebar-nav" data-testid="sidebar-nav">
@@ -103,7 +103,7 @@ function sidebarNavTemplate({
           </a>
         `,
       )}
-      ${pluginSidebarIcons.map((entry) => pluginSidebarIconTemplate({ entry }))}
+      ${pluginSidebarItems.map((entry) => pluginSidebarItemTemplate({ entry }))}
     </nav>
   `;
 }
@@ -172,7 +172,7 @@ export function sidebarTemplate({
   numChatNotifications = 0,
   onClickActiveItem,
   onClickComposeButton,
-  pluginSidebarIcons = [],
+  pluginSidebarItems = [],
 }) {
   if (!isAuthenticated) {
     return loggedOutSidebarTemplate({
@@ -305,7 +305,7 @@ export function sidebarTemplate({
         menuItems,
         activeNavItem,
         onClickActiveItem,
-        pluginSidebarIcons,
+        pluginSidebarItems,
       })}
       ${onClickComposeButton
         ? html`<button

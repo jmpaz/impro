@@ -137,7 +137,7 @@ export class PluginHost {
   constructor({ verbose = false } = {}) {
     this.registries = {
       mutedWordMatchers: new Set(),
-      sidebarIcons: new Set(),
+      sidebarItems: new Set(),
     };
 
     this.logger = new Logger("[plugins]");
@@ -320,7 +320,7 @@ export class PluginHost {
       //   this.registries.mutedWordMatchers.add(entry);
       //   return () => this.registries.mutedWordMatchers.delete(entry);
       // }
-      case "sidebarIcon": {
+      case "sidebarItem": {
         const entry = {
           pluginId: pluginInstance.pluginId,
           icon: message.icon,
@@ -328,13 +328,13 @@ export class PluginHost {
           invoke: () =>
             this._callPlugin(
               pluginInstance,
-              "sidebarIcon",
+              "sidebarItem",
               message.handlerId,
               [],
             ),
         };
-        this.registries.sidebarIcons.add(entry);
-        return () => this.registries.sidebarIcons.delete(entry);
+        this.registries.sidebarItems.add(entry);
+        return () => this.registries.sidebarItems.delete(entry);
       }
       default:
         this.logger.warn(

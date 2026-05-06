@@ -47,8 +47,8 @@ class PluginService {
     if (next.length !== ids.length) writeEnabledPlugins(next);
   }
 
-  getSidebarIcons() {
-    return [...this.pluginHost.registries.sidebarIcons];
+  getSidebarItems() {
+    return [...this.pluginHost.registries.sidebarItems];
   }
 }
 
