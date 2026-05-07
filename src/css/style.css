@@ -894,7 +894,6 @@ body.scroll-locked header {
   color: var(--icon-button-color);
   font-weight: 600;
   font-size: 15px;
-  padding-top: 12px;
   padding-bottom: 14px;
   padding-right: 16px;
   padding-left: 16px;
@@ -924,6 +923,7 @@ body.scroll-locked header {
 
 .tab-bar-horizontal-scroll-container {
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
 }
 
