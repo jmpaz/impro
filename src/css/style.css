@@ -1520,12 +1520,12 @@ button.sidebar-plugin-nav-item {
 }
 
 .post .top-bar {
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
-.large-post moderation-warning .top-bar {
+/* .large-post moderation-warning .top-bar {
   margin-bottom: 0;
-}
+} */
 
 .post-content {
   position: relative;
@@ -5892,10 +5892,10 @@ moderation-warning .top-bar {
 .post-moderation-warning-description a {
   color: var(--text-link-color);
 }
-
+/* 
 .post-content-warning .post-moderation-warning-description {
   margin-bottom: 8px;
-}
+} */
 
 .quoted-account-muted-warning .top-bar {
   margin-top: 8px;
