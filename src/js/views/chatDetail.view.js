@@ -610,7 +610,7 @@ class ChatDetailView extends View {
       return convo.members.find((member) => member.did !== currentUser?.did);
     }
 
-    async function renderPage() {
+    function renderPage() {
       const currentUser = dataLayer.selectors.getCurrentUser();
       const numNotifications =
         notificationService?.getNumNotifications() ?? null;

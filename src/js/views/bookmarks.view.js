@@ -38,7 +38,7 @@ class BookmarksView extends View {
       await loadBookmarks({ reload: true });
     }
 
-    async function renderPage() {
+    function renderPage() {
       const numNotifications =
         notificationService?.getNumNotifications() ?? null;
       const numChatNotifications =

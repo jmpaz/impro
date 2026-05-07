@@ -18,7 +18,7 @@ class FeedsView extends View {
   }) {
     await requireAuth();
 
-    async function renderPage() {
+    function renderPage() {
       const currentUser = dataLayer.selectors.getCurrentUser();
       const numNotifications =
         notificationService?.getNumNotifications() ?? null;

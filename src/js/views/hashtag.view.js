@@ -79,7 +79,7 @@ class HashtagView extends View {
       }
     }
 
-    async function renderPage() {
+    function renderPage() {
       const numNotifications =
         notificationService?.getNumNotifications() ?? null;
       const numChatNotifications =

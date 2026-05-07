@@ -187,7 +187,7 @@ class HomeView extends View {
       </div>`;
     }
 
-    async function renderPage() {
+    function renderPage() {
       const showLessInteractions =
         dataLayer.selectors.getShowLessInteractions() ?? [];
       const hiddenPostUris = showLessInteractions.map(
