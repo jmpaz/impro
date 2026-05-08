@@ -431,6 +431,7 @@ class ProfileView extends View {
                         isAuthenticated,
                         postInteractionHandler,
                         onLoadMore: () => loadAuthorFeed(),
+                        pluginService,
                       })}
                     </div>`;
                   })}

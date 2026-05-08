@@ -144,6 +144,7 @@ class FeedDetailView extends View {
                     hiddenPostUris,
                     onLoadMore: () => loadFeed(),
                     postInteractionHandler,
+                    pluginService,
                   })}
                 </div>
               </main>`,

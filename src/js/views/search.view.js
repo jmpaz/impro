@@ -203,6 +203,7 @@ class SearchView extends View {
                   replyToAuthor: post.record?.reply?.parentAuthor ?? null,
                   isUserPost: currentUser?.did === post.author?.did,
                   postInteractionHandler,
+                  pluginService,
                 })}
               </div>`,
           )}

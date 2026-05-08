@@ -69,6 +69,7 @@ class BookmarksView extends View {
                   onLoadMore: () => loadBookmarks(),
                   postInteractionHandler,
                   emptyMessage: "No saved posts yet!",
+                  pluginService,
                 })}
               </main>
             `,

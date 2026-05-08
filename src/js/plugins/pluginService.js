@@ -49,6 +49,10 @@ class PluginService {
   getSidebarItems() {
     return [...this.pluginHost.registries.sidebarItems];
   }
+
+  getPostContextMenuItems() {
+    return [...this.pluginHost.registries.postContextMenuItems];
+  }
 }
 
 export const pluginService = new PluginService();

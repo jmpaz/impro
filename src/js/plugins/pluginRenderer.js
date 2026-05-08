@@ -78,12 +78,9 @@ export class PluginRenderer {
           );
           continue;
         }
-        if (typeof handlerId !== "number" && typeof handlerId !== "string") {
-          continue;
-        }
         element.addEventListener(name, () => {
           Promise.resolve(
-            this.pluginHost.dispatchNodeEvent(pluginId, handlerId),
+            this.pluginHost.callPlugin(pluginId, handlerId),
           ).catch((error) => {
             console.warn(
               `[plugins] "${pluginId}" ${name} handler threw:`,

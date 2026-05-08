@@ -123,6 +123,7 @@ class HashtagView extends View {
                     postInteractionHandler,
                     enableFeedFeedback: false,
                     onLoadMore: () => loadCurrentFeed(),
+                    pluginService,
                   })}
                 </div>`;
               })}

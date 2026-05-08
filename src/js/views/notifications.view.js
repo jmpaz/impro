@@ -415,6 +415,7 @@ class NotificationsView extends View {
             replyToAuthor,
             postInteractionHandler,
             ignoreMuteWarning: true,
+            pluginService,
           })}
         </div>
       `;

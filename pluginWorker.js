@@ -9,19 +9,31 @@ export class SimpleUUID {
 
 const uuid = new SimpleUUID();
 
-const handlers = new Map();
+const callHandlers = new Map();
 
 let registered = false;
 
 export class Plugin {
   constructor() {}
 
-  addSidebarItem(icon, title, callback) {
+  addSidebarItem(icon, title, callback = () => {}) {
     const handlerId = uuid.create();
-    handlers.set(handlerId, callback);
+    callHandlers.set(handlerId, callback);
     self.postMessage({
       type: "register",
       target: "sidebarItem",
+      icon,
+      title,
+      handlerId,
+    });
+  }
+
+  addPostContextMenuItem(icon, title, callback = () => {}) {
+    const handlerId = uuid.create();
+    callHandlers.set(handlerId, callback);
+    self.postMessage({
+      type: "register",
+      target: "postContextMenuItem",
       icon,
       title,
       handlerId,
@@ -100,7 +112,7 @@ class VirtualEl {
 
   onClick(fn) {
     const handlerId = uuid.create();
-    handlers.set(handlerId, fn);
+    callHandlers.set(handlerId, fn);
     this.events.click = handlerId;
     return this;
   }
@@ -166,7 +178,7 @@ self.addEventListener("message", async (event) => {
 
   // RPC calls
   if (message.type === "call") {
-    const fn = handlers.get(message.handlerId);
+    const fn = callHandlers.get(message.handlerId);
     if (!fn) {
       self.postMessage({
         type: "result",

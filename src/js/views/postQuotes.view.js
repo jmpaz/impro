@@ -64,6 +64,7 @@ class PostQuotesView extends View {
               replyToAuthor: quote.record?.reply?.parentAuthor,
               isUserPost: currentUser?.did === quote.author?.did,
               postInteractionHandler,
+              pluginService,
             }),
           )}
         </div>

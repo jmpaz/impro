@@ -141,10 +141,6 @@ class PluginInstance {
   }
 
   _handleWorkerMessage(event) {
-    console.log(
-      `PluginInstance "${this.pluginId}" received message:`,
-      event.data,
-    );
     const message = event.data;
     if (!message || typeof message !== "object") return;
     switch (message.type) {
@@ -172,14 +168,13 @@ class PluginInstance {
     return instance;
   }
 
-  async call(target, handlerId, args) {
+  async call(handlerId, args) {
     const callId = this.callUuid.create();
     return new Promise((resolve, reject) => {
       this._pendingCalls.set(callId, { resolve, reject });
       this.worker.postMessage({
         type: "call",
         callId,
-        target,
         handlerId,
         args,
       });
@@ -204,6 +199,7 @@ export class PluginHost {
   constructor({ verbose = false } = {}) {
     this.registries = {
       sidebarItems: new Set(),
+      postContextMenuItems: new Set(),
     };
     this._loadedPlugins = new Map();
     this._hostCallHandlers = new Map();
@@ -279,10 +275,10 @@ export class PluginHost {
     }
   }
 
-  dispatchNodeEvent(pluginId, handlerId) {
+  callPlugin(pluginId, handlerId) {
     const instance = this._loadedPlugins.get(pluginId);
     if (!instance) return;
-    instance.call("nodeEvent", handlerId, []);
+    instance.call(handlerId, []);
   }
 
   sendNotification(pluginId, notificationType, eventData = {}) {
@@ -302,16 +298,20 @@ export class PluginHost {
           pluginId: pluginInstance.pluginId,
           icon: message.icon,
           title: message.title,
-          invoke: () =>
-            pluginInstance.call(
-              // this._callPlugin(
-              "sidebarItem",
-              message.handlerId,
-              [],
-            ),
+          invoke: () => pluginInstance.call(message.handlerId, []),
         };
         this.registries.sidebarItems.add(entry);
         return () => this.registries.sidebarItems.delete(entry);
+      }
+      case "postContextMenuItem": {
+        const entry = {
+          pluginId: pluginInstance.pluginId,
+          icon: message.icon,
+          title: message.title,
+          invoke: (post) => pluginInstance.call(message.handlerId, [post]),
+        };
+        this.registries.postContextMenuItems.add(entry);
+        return () => this.registries.postContextMenuItems.delete(entry);
       }
       default:
         logger.warn(

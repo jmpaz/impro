@@ -260,6 +260,7 @@ class HomeView extends View {
                             handleShowMore(post, feedContext, feedGenerator),
                           enableFeedFeedback: acceptsInteractions,
                           onLoadMore: () => loadCurrentFeed(),
+                          pluginService,
                         })}
                   </div>`;
                 })}

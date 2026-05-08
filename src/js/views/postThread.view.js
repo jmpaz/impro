@@ -201,6 +201,7 @@ class PostThreadView extends View {
             postInteractionHandler,
             replyContext: getReplyContext(i, numReplies),
             lazyLoadImages,
+            pluginService,
           });
         })}
       </div>`;
@@ -279,6 +280,7 @@ class PostThreadView extends View {
               ignoreContentWarning: true,
               ignoreMuteWarning: true,
               lazyLoadImages: true,
+              pluginService,
             }),
           )}
         </hidden-replies-section>
@@ -377,6 +379,7 @@ class PostThreadView extends View {
                   postInteractionHandler,
                   replyContext,
                   ignoreMuteWarning: true,
+                  pluginService,
                 }),
               });
             })}
@@ -386,6 +389,7 @@ class PostThreadView extends View {
                   post: postThread.post,
                   currentUser,
                   isAuthenticated,
+                  pluginService,
                   isUserPost: currentUser?.did === postThread.post?.author?.did,
                   postInteractionHandler,
                   afterHide: () => {
