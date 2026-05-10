@@ -2,6 +2,7 @@ import {
   filterFollowingFeed,
   filterAlgorithmicFeed,
   filterAuthorFeed,
+  filterBookmarksFeed,
 } from "/js/feedFilters.js";
 import {
   createUnavailablePost,
@@ -587,10 +588,10 @@ export class Selectors {
         post,
       });
     }
-    return {
+    return filterBookmarksFeed({
       feed: hydratedBookmarksFeed,
       cursor: bookmarks.cursor,
-    };
+    });
   }
 
   getProfileFollowers(profileDid) {

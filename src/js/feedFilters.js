@@ -308,6 +308,10 @@ export function filterAlgorithmicFeed(feed, isAuthenticated) {
   return filteredFeed;
 }
 
+export function filterBookmarksFeed(feed) {
+  return filterEmptyPosts(feed);
+}
+
 export function filterAuthorFeed(feed, isAuthenticated) {
   let filteredFeed = dedupeFeed(feed, { includeReposts: false });
   filteredFeed = filterEmptyPosts(filteredFeed);

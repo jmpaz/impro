@@ -4,6 +4,7 @@ import {
   filterFollowingFeed,
   filterAlgorithmicFeed,
   filterAuthorFeed,
+  filterBookmarksFeed,
 } from "/js/feedFilters.js";
 
 const t = new TestSuite("feedFilters");
@@ -1159,6 +1160,84 @@ t.describe("filterAuthorFeed - unauthorized filtering", (it) => {
     assertEquals(
       result.feed[0].post.uri,
       "at://did:plc:test/app.bsky.feed.post/2",
+    );
+  });
+});
+
+t.describe("filterBookmarksFeed", (it) => {
+  it("should preserve cursor", () => {
+    const feed = createFeed([], "bookmarks-cursor");
+
+    const result = filterBookmarksFeed(feed);
+
+    assertEquals(result.cursor, "bookmarks-cursor");
+  });
+
+  it("should pass through regular posts unmodified", () => {
+    const items = [
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/1" },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterBookmarksFeed(feed);
+
+    assertEquals(result.feed.length, 2);
+  });
+
+  it("should filter out blocked posts", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          $type: "app.bsky.feed.defs#blockedPost",
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterBookmarksFeed(feed);
+
+    assertEquals(result.feed.length, 1);
+    assertEquals(
+      result.feed[0].post.uri,
+      "at://did:plc:test/app.bsky.feed.post/2",
+    );
+  });
+
+  it("should filter out not-found and unavailable posts", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          $type: "app.bsky.feed.defs#notFoundPost",
+        },
+      }),
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/2",
+          $type: "social.impro.feed.defs#unavailablePost",
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/3" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterBookmarksFeed(feed);
+
+    assertEquals(result.feed.length, 1);
+    assertEquals(
+      result.feed[0].post.uri,
+      "at://did:plc:test/app.bsky.feed.post/3",
     );
   });
 });
