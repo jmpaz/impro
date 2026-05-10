@@ -171,11 +171,19 @@ class PluginInstance {
   static async loadFromSource(pluginId, source, callbacks) {
     const worker = await createSandboxedWorker(WORKER_PREFIX + source);
     const instance = new PluginInstance(pluginId, worker, callbacks);
-    return instance.waitForReady();
+    try {
+      return await instance.waitForReady(2000);
+    } catch (err) {
+      instance.unload();
+      throw err;
+    }
   }
 
-  async waitForReady() {
-    await this._readyPromise;
+  async waitForReady(timeout) {
+    const timeoutPromise = new Promise((resolve, reject) =>
+      setTimeout(() => reject(new Error("Timed out")), timeout),
+    );
+    await Promise.race([this._readyPromise, timeoutPromise]);
     return this;
   }
 
