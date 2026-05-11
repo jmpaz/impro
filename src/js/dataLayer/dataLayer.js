@@ -7,8 +7,9 @@ import { Selectors } from "/js/dataLayer/selectors.js";
 import { Declarative } from "/js/dataLayer/declarative.js";
 
 export class DataLayer {
-  constructor(api) {
+  constructor(api, pluginService) {
     this.api = api;
+    this.pluginService = pluginService;
     this.isAuthenticated = api.isAuthenticated;
     this.dataStore = new DataStore();
     this.patchStore = new PatchStore();
@@ -17,6 +18,7 @@ export class DataLayer {
       this.api,
       this.dataStore,
       this.preferencesProvider,
+      this.pluginService,
     );
     this.mutations = new Mutations(
       this.api,

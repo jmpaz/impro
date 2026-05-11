@@ -9,6 +9,7 @@ export class PluginService {
     this.registries = {
       sidebarItems: new Set(),
       postContextMenuItems: new Set(),
+      feedFilters: new Set(),
     };
     this.pluginHost = new PluginHost();
     this.pluginRenderer = new PluginRenderer(this.pluginHost);
@@ -40,6 +41,16 @@ export class PluginService {
         return () => this.registries.postContextMenuItems.delete(entry);
       },
     );
+    this.pluginHost.addRegistrationTarget("feedFilter", (plugin, message) => {
+      const entry = {
+        pluginId: plugin.pluginId,
+        filterId: plugin.filterId,
+        invoke: (feedURI, feedItems) =>
+          plugin.call(message.handlerId, feedURI, feedItems),
+      };
+      this.registries.feedFilters.add(entry);
+      return () => this.registries.feedFilters.delete(entry);
+    });
   }
 
   _setupHostMethods() {
@@ -109,5 +120,24 @@ export class PluginService {
 
   getPostContextMenuItems() {
     return [...this.registries.postContextMenuItems];
+  }
+
+  // RPC
+
+  async getFilteredFeedItems(feedUri, feed) {
+    let filteredFeedItems = {};
+    for (const feedFilter of this.registries.feedFilters) {
+      try {
+        const results = await feedFilter.invoke(feedUri, feed.feed);
+        if (typeof results !== "object") continue;
+        filteredFeedItems = { ...filteredFeedItems, ...results };
+      } catch (e) {
+        console.error(
+          `Plugin ${feedFilter.pluginId} feed filter '${feedFilter.filterId}' raised an exception`,
+          e,
+        );
+      }
+    }
+    return filteredFeedItems;
   }
 }

@@ -283,7 +283,24 @@ class FilterContentLabeledPosts extends FeedFilter {
   }
 }
 
-export function filterFollowingFeed(feed, currentUser, preferences) {
+class FilterPluginFilteredPosts extends FeedFilter {
+  constructor(pluginFilteredFeedItems) {
+    super();
+    this.pluginFilteredFeedItems = pluginFilteredFeedItems;
+  }
+  filterFeedItems(feedItems) {
+    return feedItems.filter(
+      (item) => this.pluginFilteredFeedItems[item.post.uri] !== false,
+    );
+  }
+}
+
+export function filterFollowingFeed(
+  feed,
+  currentUser,
+  preferences,
+  pluginFilteredFeedItems,
+) {
   const followingFeedPreference = preferences.getFollowingFeedPreference();
   const filter = FeedFilter.compose(
     new FilterByFollowing(currentUser),
@@ -299,6 +316,7 @@ export function filterFollowingFeed(feed, currentUser, preferences) {
     new FilterEmptyPosts(),
     new FilterHiddenPosts(),
     new FilterContentLabeledPosts(),
+    new FilterPluginFilteredPosts(pluginFilteredFeedItems),
   );
   return {
     feed: filter.filterFeedItems(feed.feed),
@@ -306,7 +324,11 @@ export function filterFollowingFeed(feed, currentUser, preferences) {
   };
 }
 
-export function filterAlgorithmicFeed(feed, isAuthenticated) {
+export function filterAlgorithmicFeed(
+  feed,
+  isAuthenticated,
+  pluginFilteredFeedItems,
+) {
   const filter = FeedFilter.compose(
     new FilterBlockedQuotes(),
     new DedupeFeed(),
@@ -316,6 +338,7 @@ export function filterAlgorithmicFeed(feed, isAuthenticated) {
     new FilterHiddenPosts(),
     new FilterContentLabeledPosts(),
     new FilterUnauthorizedPosts(isAuthenticated),
+    new FilterPluginFilteredPosts(pluginFilteredFeedItems),
   );
   return {
     feed: filter.filterFeedItems(feed.feed),

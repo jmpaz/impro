@@ -46,6 +46,8 @@ export class DataStore extends EventEmitter {
     this.profileFollows = new Map();
     this.profileChatStatus = new Map();
     this.labelerInfo = new Map();
+    // Plugin data
+    this.pluginFilteredFeedItems = new Map();
   }
 
   hasCurrentUser() {
@@ -647,5 +649,21 @@ export class DataStore extends EventEmitter {
 
   clearLabelerInfo(labelerDid) {
     this.labelerInfo.delete(labelerDid);
+  }
+
+  hasPluginFilteredFeedItems(feedURI) {
+    return this.pluginFilteredFeedItems.has(feedURI);
+  }
+
+  getPluginFilteredFeedItems(feedURI) {
+    return this.pluginFilteredFeedItems.get(feedURI);
+  }
+
+  setPluginFilteredFeedItems(feedURI, info) {
+    this.pluginFilteredFeedItems.set(feedURI, info);
+  }
+
+  clearPluginFilteredFeedItems(feedURI) {
+    this.pluginFilteredFeedItems.delete(feedURI);
   }
 }

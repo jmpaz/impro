@@ -67,7 +67,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 2);
     assertEquals(result.cursor, "test-cursor");
@@ -87,7 +87,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences({ hideReposts: true });
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -106,7 +106,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences({ hideReposts: false });
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 2);
   });
@@ -128,7 +128,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences({ hideReplies: true });
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -146,7 +146,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 2);
   });
@@ -164,7 +164,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -183,7 +183,7 @@ t.describe("filterFollowingFeed", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 2);
   });
@@ -197,7 +197,7 @@ t.describe("filterFollowingFeed", (it) => {
     const feed = createFeed(items);
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, null, preferences);
+    const result = filterFollowingFeed(feed, null, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -212,7 +212,7 @@ t.describe("filterAlgorithmicFeed", (it) => {
     ];
     const feed = createFeed(items);
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -228,7 +228,7 @@ t.describe("filterAlgorithmicFeed", (it) => {
     ];
     const feed = createFeed(items);
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -236,7 +236,7 @@ t.describe("filterAlgorithmicFeed", (it) => {
   it("should preserve cursor", () => {
     const feed = createFeed([], "my-cursor");
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.cursor, "my-cursor");
   });
@@ -244,7 +244,7 @@ t.describe("filterAlgorithmicFeed", (it) => {
   it("should handle empty feed", () => {
     const feed = createFeed([]);
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.feed.length, 0);
   });
@@ -614,7 +614,7 @@ t.describe("filterFollowingFeed - content label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
     assertEquals(
@@ -639,7 +639,7 @@ t.describe("filterFollowingFeed - content label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 2);
   });
@@ -666,7 +666,7 @@ t.describe("filterFollowingFeed - content label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
     assertEquals(
@@ -694,7 +694,7 @@ t.describe("filterFollowingFeed - content label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -715,7 +715,7 @@ t.describe("filterAlgorithmicFeed - content label filtering", (it) => {
     ];
     const feed = createFeed(items);
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -759,7 +759,7 @@ t.describe("filterFollowingFeed - badge label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
     assertEquals(
@@ -781,7 +781,7 @@ t.describe("filterFollowingFeed - badge label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -808,7 +808,7 @@ t.describe("filterFollowingFeed - badge label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
     assertEquals(
@@ -836,7 +836,7 @@ t.describe("filterFollowingFeed - badge label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -854,7 +854,7 @@ t.describe("filterFollowingFeed - badge label filtering", (it) => {
     const currentUser = createCurrentUser();
     const preferences = createPreferences();
 
-    const result = filterFollowingFeed(feed, currentUser, preferences);
+    const result = filterFollowingFeed(feed, currentUser, preferences, {});
 
     assertEquals(result.feed.length, 0);
   });
@@ -875,7 +875,7 @@ t.describe("filterAlgorithmicFeed - badge label filtering", (it) => {
     ];
     const feed = createFeed(items);
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.feed.length, 1);
   });
@@ -966,7 +966,7 @@ t.describe("filterAlgorithmicFeed - unauthorized filtering", (it) => {
     ];
     const feed = createFeed(items);
 
-    const result = filterAlgorithmicFeed(feed, false);
+    const result = filterAlgorithmicFeed(feed, false, {});
 
     assertEquals(result.feed.length, 1);
     assertEquals(
@@ -990,7 +990,7 @@ t.describe("filterAlgorithmicFeed - unauthorized filtering", (it) => {
     ];
     const feed = createFeed(items);
 
-    const result = filterAlgorithmicFeed(feed, true);
+    const result = filterAlgorithmicFeed(feed, true, {});
 
     assertEquals(result.feed.length, 1);
   });

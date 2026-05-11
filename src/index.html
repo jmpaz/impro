@@ -119,6 +119,18 @@
 
         handleAppViewResetQueryParam();
 
+        const pluginService = new PluginService();
+
+        // Dev helpers
+        window.enablePlugin = pluginService.enablePlugin.bind(pluginService);
+        window.disablePlugin = pluginService.disablePlugin.bind(pluginService);
+
+        try {
+          await pluginService.loadEnabledPlugins();
+        } catch (error) {
+          console.error("Error loading plugins", error);
+        }
+
         const auth = await getAuth();
         const session = await auth.getSession();
         const appViewConfig = getAppViewConfig();
@@ -126,7 +138,7 @@
           bskyAppViewServiceDid: appViewConfig.appViewServiceDid,
           chatAppViewServiceDid: appViewConfig.chatServiceDid,
         });
-        const dataLayer = new DataLayer(api);
+        const dataLayer = new DataLayer(api, pluginService);
         // put dataLayer on window for easy access in dev tools
         window.dataLayer = dataLayer;
         const identityResolver = new IdentityResolver();
@@ -157,18 +169,6 @@
             console.error("Error initializing preferences:", retryError);
             throw retryError;
           }
-        }
-
-        const pluginService = new PluginService();
-
-        // Dev helpers
-        window.enablePlugin = pluginService.enablePlugin.bind(pluginService);
-        window.disablePlugin = pluginService.disablePlugin.bind(pluginService);
-
-        try {
-          await pluginService.loadEnabledPlugins();
-        } catch (error) {
-          console.error("Error loading plugins", error);
         }
 
         if (notificationService) {

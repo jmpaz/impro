@@ -64,8 +64,15 @@ class StatusStore {
 
 // Handles making requests to the API and storing the data in the data store.
 export class Requests {
-  constructor(api, dataStore, preferencesProvider, { constellation } = {}) {
+  constructor(
+    api,
+    dataStore,
+    preferencesProvider,
+    pluginService,
+    { constellation } = {},
+  ) {
     this.api = api;
+    this.pluginService = pluginService;
     this.dataStore = dataStore;
     this.preferencesProvider = preferencesProvider;
     this.constellation = constellation ?? new Constellation();
@@ -361,6 +368,15 @@ export class Requests {
     if (blockedPostUris.length > 0) {
       await this._loadBlockedPosts(blockedPostUris);
     }
+    // Filter posts with plugins
+    const pluginFilteredFeedItems =
+      await this.pluginService.getFilteredFeedItems(feedURI, feed);
+    const existingFilteredFeedItems =
+      this.dataStore.getPluginFilteredFeedItems(feedURI) ?? {};
+    this.dataStore.setPluginFilteredFeedItems(feedURI, {
+      ...existingFilteredFeedItems,
+      ...pluginFilteredFeedItems,
+    });
     if (existingFeed && !reload) {
       // Append to existing feed
       this.dataStore.setFeed(feedURI, {

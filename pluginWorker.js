@@ -40,6 +40,17 @@ export class Plugin {
     });
   }
 
+  addFeedFilter(filterId, callback = () => {}) {
+    const handlerId = uuid.create();
+    callHandlers.set(handlerId, callback);
+    self.postMessage({
+      type: "register",
+      target: "feedFilter",
+      filterId,
+      handlerId,
+    });
+  }
+
   onload() {}
   onunload() {}
 
