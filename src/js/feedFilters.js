@@ -283,12 +283,7 @@ class FilterContentLabeledPosts extends FeedFilter {
   }
 }
 
-export function filterFollowingFeed(
-  feed,
-  currentUser,
-  preferences,
-  isAuthenticated,
-) {
+export function filterFollowingFeed(feed, currentUser, preferences) {
   const followingFeedPreference = preferences.getFollowingFeedPreference();
   const filter = FeedFilter.compose(
     new FilterByFollowing(currentUser),
@@ -304,7 +299,6 @@ export function filterFollowingFeed(
     new FilterEmptyPosts(),
     new FilterHiddenPosts(),
     new FilterContentLabeledPosts(),
-    new FilterUnauthorizedPosts(isAuthenticated),
   );
   return {
     feed: filter.filterFeedItems(feed.feed),
