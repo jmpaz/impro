@@ -352,8 +352,9 @@ class PostThreadView extends View {
         // this happens if the client has malformed reply refs.
         const replyParent = postThread.post?.record?.reply?.parent;
         const hasParent = !!replyParent;
+        // Don't set this to true unless the full post thread has loaded
         const hasBrokenReplyRef =
-          hasParent && postThread.parent && parents.length === 0;
+          hasParent && !postThread.__isPrefill && parents.length === 0;
         const root = getReplyRootFromPost(postThread.post);
         const replies = postThread.replies;
         const postAuthor = postThread.post?.author;
@@ -482,6 +483,7 @@ class PostThreadView extends View {
         const post = dataLayer.selectors.getPost(postUri);
         if (post) {
           postThread = {
+            __isPrefill: true,
             post,
             parent: null,
             replies: null,
