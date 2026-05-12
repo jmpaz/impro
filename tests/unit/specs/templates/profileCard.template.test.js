@@ -645,10 +645,10 @@ t.describe("profileCardTemplate - authentication states", (it) => {
     assert(editProfileCalled);
   });
 
-  it("should render chat button for authenticated user viewing other profile when chat is allowed", () => {
+  it("should render enabled chat button when following and chat is allowed", () => {
     const profile = {
       ...mockProfile,
-      viewer: { following: false, followedBy: false },
+      viewer: { following: "at://follow", followedBy: false },
     };
     const result = profileCardTemplate({
       profile,
@@ -659,10 +659,50 @@ t.describe("profileCardTemplate - authentication states", (it) => {
     });
     const container = document.createElement("div");
     render(result, container);
-    assert(container.querySelector("[data-testid='chat-button']") !== null);
+    const button = container.querySelector("[data-testid='chat-button']");
+    assert(button !== null);
+    assertEquals(button.disabled, false);
   });
 
-  it("should not render chat button when chat is not allowed", () => {
+  it("should render disabled chat button when following but chat status is not yet loaded", () => {
+    const profile = {
+      ...mockProfile,
+      viewer: { following: "at://follow", followedBy: false },
+    };
+    const result = profileCardTemplate({
+      profile,
+      isAuthenticated: true,
+      isCurrentUser: false,
+      profileChatStatus: null,
+      onClickChat: () => {},
+    });
+    const container = document.createElement("div");
+    render(result, container);
+    const button = container.querySelector("[data-testid='chat-button']");
+    assert(button !== null);
+    assertEquals(button.disabled, true);
+  });
+
+  it("should render disabled chat button when following but chat is not allowed", () => {
+    const profile = {
+      ...mockProfile,
+      viewer: { following: "at://follow", followedBy: false },
+    };
+    const result = profileCardTemplate({
+      profile,
+      isAuthenticated: true,
+      isCurrentUser: false,
+      profileChatStatus: { canChat: false },
+      onClickChat: () => {},
+    });
+    const container = document.createElement("div");
+    render(result, container);
+    const button = container.querySelector("[data-testid='chat-button']");
+    assert(button !== null);
+    assertEquals(button.disabled, true);
+  });
+
+  it("should not render chat button when not following the profile", () => {
     const profile = {
       ...mockProfile,
       viewer: { following: false, followedBy: false },
@@ -671,7 +711,7 @@ t.describe("profileCardTemplate - authentication states", (it) => {
       profile,
       isAuthenticated: true,
       isCurrentUser: false,
-      profileChatStatus: { canChat: false },
+      profileChatStatus: { canChat: true },
       onClickChat: () => {},
     });
     const container = document.createElement("div");

@@ -385,25 +385,55 @@ test.describe("Profile view", () => {
     await expect(view.locator('[data-testid="chat-button"]')).not.toBeVisible();
   });
 
-  test("should show chat button for other users", async ({ page }) => {
+  test("should show enabled chat button for followed users who can be messaged", async ({
+    page,
+  }) => {
+    const followedUser = {
+      ...otherUser,
+      viewer: { ...otherUser.viewer, following: "at://follow" },
+    };
     const mockServer = new MockServer();
-    mockServer.addProfile({ ...otherUser, canChat: true });
+    mockServer.addProfile({ ...followedUser, canChat: true });
     await mockServer.setup(page);
 
     await login(page);
-    await page.goto(`/profile/${otherUser.did}`);
+    await page.goto(`/profile/${followedUser.did}`);
 
     const view = page.locator("#profile-view");
-    await expect(view.locator('[data-testid="chat-button"]')).toBeVisible({
-      timeout: 10000,
-    });
+    const chatButton = view.locator('[data-testid="chat-button"]');
+    await expect(chatButton).toBeVisible({ timeout: 10000 });
+    await expect(chatButton).toBeEnabled({ timeout: 10000 });
   });
 
-  test("should hide chat button for users who cannot be messaged", async ({
+  test("should show disabled chat button for followed users who cannot be messaged", async ({
+    page,
+  }) => {
+    const followedUser = {
+      ...otherUser,
+      viewer: { ...otherUser.viewer, following: "at://follow" },
+    };
+    const mockServer = new MockServer();
+    mockServer.addProfile({ ...followedUser, canChat: false });
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto(`/profile/${followedUser.did}`);
+
+    const view = page.locator("#profile-view");
+    await expect(view.locator('[data-testid="profile-name"]')).toContainText(
+      "Other User",
+      { timeout: 10000 },
+    );
+    const chatButton = view.locator('[data-testid="chat-button"]');
+    await expect(chatButton).toBeVisible({ timeout: 10000 });
+    await expect(chatButton).toBeDisabled();
+  });
+
+  test("should hide chat button for users that are not followed", async ({
     page,
   }) => {
     const mockServer = new MockServer();
-    mockServer.addProfile({ ...otherUser, canChat: false });
+    mockServer.addProfile({ ...otherUser, canChat: true });
     await mockServer.setup(page);
 
     await login(page);

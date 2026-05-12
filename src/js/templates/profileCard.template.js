@@ -147,11 +147,12 @@ export function profileCardTemplate({
                   })}
                 </button>`
               : ""}
-            ${canChat
+            ${isFollowing
               ? html`<button
                   class="rounded-button chat-button"
                   data-testid="chat-button"
                   title="Go to chat"
+                  ?disabled=${!canChat}
                   @click=${() => {
                     onClickChat(profile);
                   }}
