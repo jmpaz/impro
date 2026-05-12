@@ -2,7 +2,7 @@ import { View } from "/js/views/view.js";
 import { html, render } from "/js/lib/lit-html.js";
 import { eyeIconTemplate } from "/js/templates/icons/eyeIcon.template.js";
 import { mutedWordIconTemplate } from "/js/templates/icons/mutedWordIcon.template.js";
-import { eyeSlashIconTemplate } from "/js/templates/icons/eyeSlashIcon.template.js";
+import { restrictedIconTemplate } from "/js/templates/icons/restrictedIcon.template.js";
 import { codeIconTemplate } from "/js/templates/icons/codeIcon.template.js";
 import { boxIconTemplate } from "/js/templates/icons/boxIcon.template.js";
 import { getAuth, requireAuth } from "/js/auth.js";
@@ -39,7 +39,7 @@ class SettingsView extends View {
         enabled: true,
       },
       {
-        icon: eyeSlashIconTemplate,
+        icon: restrictedIconTemplate,
         label: "Blocked accounts",
         url: "/settings/blocked-accounts",
         enabled: true,
