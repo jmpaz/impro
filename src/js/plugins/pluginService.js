@@ -184,10 +184,10 @@ export class PluginService extends EventEmitter {
     const installedPluginsPreference = this._getInstalledPluginsPreference();
     const results = await Promise.all(
       installedPluginsPreference.map(async (entry) => {
-        const manifest = await this.sourceProvider.ensureManifest(
-          entry.id,
-          entry.version,
-        );
+        const [manifest, listing] = await Promise.all([
+          this.sourceProvider.ensureManifest(entry.id, entry.version),
+          this.registry.getPluginListing(entry.id).catch(() => null),
+        ]);
         if (!manifest) return null;
         return {
           id: entry.id,
@@ -195,6 +195,7 @@ export class PluginService extends EventEmitter {
           enabled: entry.enabled === true,
           loaded: this.pluginBridge.isLoaded(entry.id),
           hasSettings: this.registries.settingTabs.has(entry.id),
+          local: listing?.local === true,
         };
       }),
     );

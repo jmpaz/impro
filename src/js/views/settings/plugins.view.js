@@ -154,6 +154,11 @@ class SettingsPluginsView extends View {
                               <div class="plugin-list-item-info">
                                 <div class="plugin-list-item-name">
                                   ${plugin.manifest.name}
+                                  ${plugin.local
+                                    ? html`<span class="plugin-local-badge"
+                                        >local</span
+                                      >`
+                                    : ""}
                                 </div>
                                 ${plugin.manifest.description
                                   ? html`<div
@@ -163,7 +168,10 @@ class SettingsPluginsView extends View {
                                     </div>`
                                   : ""}
                                 <div class="plugin-list-item-version">
-                                  v${plugin.manifest.version}
+                                  Version: ${plugin.manifest.version}
+                                </div>
+                                <div class="plugin-list-item-author">
+                                  By ${plugin.manifest.author}
                                 </div>
                               </div>
                               <div class="plugin-list-item-controls">

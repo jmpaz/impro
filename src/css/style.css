@@ -7385,13 +7385,27 @@ image-cropper {
   font-weight: 600;
 }
 
+.plugin-local-badge {
+  font-size: 12px;
+  font-weight: 400;
+  background: var(--primary-button-muted-color);
+  padding: 3px 8px;
+  border-radius: var(--tag-border-radius);
+  display: inline-block;
+  min-width: fit-content;
+  margin-left: 5px;
+  vertical-align: middle;
+  margin-bottom: 3px;
+}
+
 .plugin-list-item-description {
   font-size: 14px;
   opacity: 0.8;
   margin-top: 2px;
 }
 
-.plugin-list-item-version {
+.plugin-list-item-version,
+.plugin-list-item-author {
   font-size: 12px;
   opacity: 0.6;
   margin-top: 4px;

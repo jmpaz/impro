@@ -20,14 +20,12 @@ class SettingsCommunityPluginsView extends View {
     await requireAuth();
 
     const state = {
-      entries: [],
-      loading: true,
+      entries: null,
       error: null,
       pending: new Set(),
     };
 
     async function loadEntries() {
-      state.loading = true;
       state.error = null;
       renderPage();
       try {
@@ -35,7 +33,6 @@ class SettingsCommunityPluginsView extends View {
       } catch (error) {
         state.error = error.message ?? String(error);
       }
-      state.loading = false;
       renderPage();
     }
 
@@ -102,8 +99,8 @@ class SettingsCommunityPluginsView extends View {
                 onClickBackButton: () => window.router.go("/settings/plugins"),
               })}
               <main>
-                ${state.loading
-                  ? html`<p class="plugin-list-loading">Loading…</p>`
+                ${!state.entries
+                  ? "" // loading is usually quick, so don't show a loading state
                   : state.error
                     ? html`<div class="error-state">
                         <div>Failed to load plugins</div>
@@ -129,6 +126,11 @@ class SettingsCommunityPluginsView extends View {
                                 <div class="plugin-list-item-info">
                                   <div class="plugin-list-item-name">
                                     ${entry.name}
+                                    ${entry.local
+                                      ? html`<span class="plugin-local-badge"
+                                          >local</span
+                                        >`
+                                      : ""}
                                   </div>
                                   ${entry.description
                                     ? html`<div
