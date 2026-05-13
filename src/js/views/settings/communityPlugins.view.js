@@ -4,6 +4,7 @@ import { headerTemplate } from "/js/templates/header.template.js";
 import { mainLayoutTemplate } from "/js/templates/mainLayout.template.js";
 import { requireAuth } from "/js/auth.js";
 import { showToast } from "/js/toasts.js";
+import { confirm } from "/js/modals.js";
 
 class SettingsCommunityPluginsView extends View {
   async render({
@@ -39,9 +40,20 @@ class SettingsCommunityPluginsView extends View {
     }
 
     async function toggleInstall(entry) {
+      const wasInstalled = entry.installed;
+      if (wasInstalled) {
+        const confirmed = await confirm(
+          `"${entry.name}" will be disabled and uninstalled.`,
+          {
+            title: "Uninstall plugin?",
+            confirmButtonStyle: "danger",
+            confirmButtonText: "Uninstall",
+          },
+        );
+        if (!confirmed) return;
+      }
       state.pending.add(entry.id);
       renderPage();
-      const wasInstalled = entry.installed;
       try {
         if (wasInstalled) {
           await pluginService.uninstallPlugin(entry.id);
