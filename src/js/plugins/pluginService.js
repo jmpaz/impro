@@ -1,5 +1,6 @@
 import { PluginBridge } from "/js/plugins/pluginBridge.js";
 import { showPluginModal, hidePluginModal } from "/js/modals.js";
+import { showPluginToast, hidePluginToast } from "/js/toasts.js";
 import { PluginRenderer } from "/js/plugins/pluginRendering.js";
 import { PluginRegistry } from "/js/plugins/pluginRegistry.js";
 import { PluginCache } from "/js/plugins/pluginCache.js";
@@ -138,6 +139,23 @@ export class PluginService extends EventEmitter {
 
     this.pluginBridge.addHostMethod("refreshSettingTab", (plugin) => {
       this.emit("settingTabRefresh", { pluginId: plugin.pluginId });
+    });
+
+    this.pluginBridge.addHostMethod(
+      "showToast",
+      (plugin, { toastId, element, timeout }) => {
+        showPluginToast({
+          pluginRenderer: this.pluginRenderer,
+          pluginId: plugin.pluginId,
+          toastId,
+          element,
+          timeout,
+        });
+      },
+    );
+
+    this.pluginBridge.addHostMethod("hideToast", (plugin, { toastId }) => {
+      hidePluginToast({ pluginId: plugin.pluginId, toastId });
     });
 
     this.pluginBridge.addHostMethod("getCurrentUser", () => {

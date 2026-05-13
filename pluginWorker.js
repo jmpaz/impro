@@ -100,6 +100,34 @@ class App {
   }
 }
 
+export class Notice {
+  constructor(message, timeout = 0) {
+    this._toastId = uuid.create();
+    this._timeout = timeout;
+    this._hidden = false;
+    this.noticeEl = new VirtualEl("div");
+    this.noticeEl.addClass("toast");
+    this.noticeEl.setText(message);
+    queueMicrotask(() => {
+      if (this._hidden) return;
+      hostCall("showToast", {
+        toastId: this._toastId,
+        element: this.noticeEl._serialize(),
+        timeout: this._timeout,
+      });
+    });
+  }
+  setMessage(message) {
+    this.noticeEl.setText(message);
+    return this;
+  }
+  hide() {
+    if (this._hidden) return;
+    this._hidden = true;
+    hostCall("hideToast", { toastId: this._toastId });
+  }
+}
+
 let registered = false;
 
 export class Plugin {
