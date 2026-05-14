@@ -65,7 +65,6 @@ class SettingsCommunityPluginsView extends View {
           { style: wasInstalled ? "default" : "success" },
         );
       } catch (error) {
-        state.error = error.message ?? String(error);
         showToast(
           wasInstalled
             ? `Failed to uninstall ${entry.name}`
@@ -150,10 +149,13 @@ class SettingsCommunityPluginsView extends View {
                                     @click=${() => toggleInstall(entry)}
                                   >
                                     ${pending
-                                      ? html`<div
-                                          class="loading-spinner"
-                                          data-testid="loading-spinner"
-                                        ></div>`
+                                      ? html`${entry.installed
+                                            ? "Uninstalling"
+                                            : "Installing"}
+                                          <div
+                                            class="loading-spinner"
+                                            data-testid="loading-spinner"
+                                          ></div>`
                                       : entry.installed
                                         ? "Uninstall"
                                         : "Install"}

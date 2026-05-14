@@ -227,16 +227,21 @@ export class PluginService extends EventEmitter {
 
   async loadPluginsInfo() {
     const installedPluginsPreference = this._getInstalledPluginsPreference();
-    const results = await Promise.all(
+    this._pluginsInfo = await Promise.all(
       installedPluginsPreference.map(async (entry) => {
         const [manifest, listing] = await Promise.all([
-          this.sourceProvider.ensureManifest(entry.id, entry.version),
+          this.sourceProvider
+            .getManifest(entry.id, entry.version)
+            .catch(() => null),
           this.registry.getPluginListing(entry.id).catch(() => null),
         ]);
-        if (!manifest) return null;
         return {
           id: entry.id,
-          manifest,
+          name: manifest?.name ?? entry.id,
+          description:
+            manifest?.description ?? "Failed to load plugin manifest",
+          version: manifest?.version ?? "-",
+          author: manifest?.author ?? "Unknown",
           enabled: entry.enabled === true,
           loaded: this.pluginBridge.isLoaded(entry.id),
           hasSettings: this.registries.settingTabs.has(entry.id),
@@ -244,7 +249,6 @@ export class PluginService extends EventEmitter {
         };
       }),
     );
-    this._pluginsInfo = results.filter((entry) => entry !== null);
   }
 
   async loadEnabledPlugins() {
@@ -271,10 +275,9 @@ export class PluginService extends EventEmitter {
       this._getInstalledPluginsPreference().find(
         (plugin) => plugin.id === pluginId,
       );
-    return this.sourceProvider.ensureManifest(
-      pluginId,
-      installedPluginsPreference?.version,
-    );
+    return this.sourceProvider
+      .getManifest(pluginId, installedPluginsPreference?.version)
+      .catch(() => null);
   }
 
   _getInstalledPluginsPreference() {
@@ -312,23 +315,33 @@ export class PluginService extends EventEmitter {
     const installedPluginsPreference = this._getInstalledPluginsPreference();
     if (installedPluginsPreference.some((plugin) => plugin.id === pluginId))
       return;
-    const version = listing.local
-      ? (await this.sourceProvider.getManifest(pluginId)).version
-      : (await this.sourceProvider.getLiveManifest(pluginId)).version;
-    await this._setInstalledPluginsPreference([
-      ...installedPluginsPreference,
-      { id: pluginId, version, enabled: true },
-    ]);
-    await this.pluginBridge.loadPlugin(pluginId, version);
+    let manifest = null;
+    try {
+      manifest = listing.local
+        ? await this.sourceProvider.getManifest(pluginId)
+        : await this.sourceProvider.getLiveManifest(pluginId);
+    } catch (e) {
+      console.error("Failed to fetch manifest", e);
+      throw new Error("Failed to fetch manifest");
+    }
+    const version = manifest.version;
+    await this._addPluginPreferenceEntry({
+      id: pluginId,
+      version,
+      enabled: true,
+    });
+    try {
+      await this.pluginBridge.loadPlugin(pluginId, version);
+    } catch (e) {
+      await this._removePluginPreferenceEntry(pluginId);
+      throw e;
+    }
   }
 
   async uninstallPlugin(pluginId) {
     this.pluginBridge.unloadPlugin(pluginId);
-    const next = this._getInstalledPluginsPreference().filter(
-      (plugin) => plugin.id !== pluginId,
-    );
-    await this._setInstalledPluginsPreference(next);
-    await this._reconcileCache(next);
+    await this._removePluginPreferenceEntry(pluginId);
+    await this._reconcileCache(this._getInstalledPluginsPreference());
   }
 
   async enablePlugin(pluginId) {
@@ -408,6 +421,21 @@ export class PluginService extends EventEmitter {
       }
     });
     return { updated, failed };
+  }
+
+  async _addPluginPreferenceEntry(entry) {
+    const installedPluginsPreference = this._getInstalledPluginsPreference();
+    await this._setInstalledPluginsPreference([
+      ...installedPluginsPreference,
+      entry,
+    ]);
+  }
+
+  async _removePluginPreferenceEntry(pluginId) {
+    const next = this._getInstalledPluginsPreference().filter(
+      (plugin) => plugin.id !== pluginId,
+    );
+    await this._setInstalledPluginsPreference(next);
   }
 
   async _updatePluginPreferenceEntry(pluginId, updateFunc) {

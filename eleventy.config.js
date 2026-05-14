@@ -7,28 +7,33 @@ export default async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/css");
   eleventyConfig.addPassthroughCopy("src/img");
   eleventyConfig.addPassthroughCopy("src/manifest.json");
-  eleventyConfig.addPassthroughCopy("plugins-local");
-  eleventyConfig.addWatchTarget("plugins-local");
 
   // Prevent sandbox from being treated as a template
   eleventyConfig.ignores.add("src/js/plugins/sandbox.html");
 
-  // Local plugin index
+  // Add watch targets for local plugins
+  eleventyConfig.addWatchTarget("plugins-local");
+  for (const entry of fs.readdirSync("plugins-local", {
+    withFileTypes: true,
+  })) {
+    if (!entry.isSymbolicLink()) continue;
+    const realPath = fs.realpathSync(path.join("plugins-local", entry.name));
+    eleventyConfig.addWatchTarget(`${realPath}/{manifest.json,main.js}`);
+  }
+
+  // Copy local plugins into build and generate index
   eleventyConfig.on("eleventy.before", () => {
     const localPluginsDir = "plugins-local";
-    if (!fs.existsSync(localPluginsDir)) return;
     const listings = [];
+    fs.mkdirSync("build/plugins-local", { recursive: true });
     for (const entry of fs.readdirSync(localPluginsDir, {
       withFileTypes: true,
     })) {
-      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+      if (!(entry.isDirectory() || entry.isSymbolicLink())) continue;
       if (entry.name.startsWith(".")) continue;
-      const manifestPath = path.join(
-        localPluginsDir,
-        entry.name,
-        "manifest.json",
-      );
-      const mainPath = path.join(localPluginsDir, entry.name, "main.js");
+      const pluginPath = path.join(localPluginsDir, entry.name);
+      const manifestPath = path.join(pluginPath, "manifest.json");
+      const mainPath = path.join(pluginPath, "main.js");
       if (!fs.existsSync(manifestPath) || !fs.existsSync(mainPath)) continue;
       const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
       listings.push({
@@ -37,8 +42,11 @@ export default async function (eleventyConfig) {
         author: manifest.author,
         description: manifest.description,
       });
+      const destDir = path.join("build/plugins-local", entry.name);
+      fs.mkdirSync(destDir, { recursive: true });
+      fs.copyFileSync(manifestPath, path.join(destDir, "manifest.json"));
+      fs.copyFileSync(mainPath, path.join(destDir, "main.js"));
     }
-    fs.mkdirSync("build/plugins-local", { recursive: true });
     fs.writeFileSync(
       "build/plugins-local/index.json",
       JSON.stringify(listings, null, 2),

@@ -27,29 +27,6 @@ export class SourceProvider {
     this.registry = registry;
     this.pluginCache = pluginCache;
     this._fetch = fetchImpl ?? ((...args) => window.fetch(...args));
-    this._manifestCache = new Map();
-  }
-
-  async ensureManifest(pluginId, version) {
-    const cacheKey = `${pluginId}@${version ?? ""}`;
-    if (this._manifestCache.has(cacheKey)) {
-      return this._manifestCache.get(cacheKey);
-    }
-    let listing;
-    try {
-      listing = await this._resolveListing(pluginId);
-    } catch {
-      return null;
-    }
-    try {
-      const manifest = await this._fetchManifest(pluginId, listing, version);
-      // Local plugins are served from disk and may change between reads,
-      // so always refetch — only cache versioned remote manifests.
-      if (!listing.local) this._manifestCache.set(cacheKey, manifest);
-      return manifest;
-    } catch {
-      return null;
-    }
   }
 
   async _resolveListing(pluginId) {

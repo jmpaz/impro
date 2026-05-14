@@ -164,69 +164,6 @@ t.describe("SourceProvider with remote listings", (it) => {
   });
 });
 
-t.describe("SourceProvider.ensureManifest", (it) => {
-  it("caches manifests across calls with the same version", async () => {
-    let fetchCount = 0;
-    const pluginCache = {
-      async fetch() {
-        fetchCount++;
-        return jsonResponse({ id: "alpha", name: "A", version: "1.0.0" });
-      },
-    };
-    const provider = new SourceProvider(
-      fakeRegistry({ alpha: { id: "alpha", repo: "ow/alpha" } }),
-      pluginCache,
-    );
-    const first = await provider.ensureManifest("alpha", "1.0.0");
-    const second = await provider.ensureManifest("alpha", "1.0.0");
-    assertEquals(first.version, "1.0.0");
-    assertEquals(second, first);
-    assertEquals(fetchCount, 1);
-  });
-
-  it("refetches when the requested version changes", async () => {
-    let fetchCount = 0;
-    const pluginCache = {
-      async fetch(url) {
-        fetchCount++;
-        const match = url.match(/\/([^/]+)\/manifest\.json$/);
-        const version = match[1];
-        return jsonResponse({ id: "alpha", name: "A", version });
-      },
-    };
-    const provider = new SourceProvider(
-      fakeRegistry({ alpha: { id: "alpha", repo: "ow/alpha" } }),
-      pluginCache,
-    );
-    const first = await provider.ensureManifest("alpha", "1.0.0");
-    const second = await provider.ensureManifest("alpha", "2.0.0");
-    assertEquals(first.version, "1.0.0");
-    assertEquals(second.version, "2.0.0");
-    assertEquals(fetchCount, 2);
-  });
-
-  it("returns null when manifest fetch fails", async () => {
-    const provider = new SourceProvider(fakeRegistry({}), null);
-    assertEquals(await provider.ensureManifest("missing"), null);
-  });
-
-  it("re-fetches local manifests so version changes are picked up", async () => {
-    let version = "1.0.0";
-    const fetchImpl = async () =>
-      jsonResponse({ id: "alpha", name: "A", version });
-    const provider = new SourceProvider(
-      fakeRegistry({ alpha: { id: "alpha", name: "A", local: true } }),
-      null,
-      { fetchImpl },
-    );
-    const first = await provider.ensureManifest("alpha");
-    assertEquals(first.version, "1.0.0");
-    version = "1.1.0";
-    const second = await provider.ensureManifest("alpha");
-    assertEquals(second.version, "1.1.0");
-  });
-});
-
 t.describe("SourceProvider.getLiveManifest", (it) => {
   it("hits raw.githubusercontent.com at main", async () => {
     const liveUrl =

@@ -42,7 +42,7 @@ class SettingsPluginsView extends View {
 
     async function uninstallPlugin(plugin) {
       const confirmed = await confirm(
-        `"${plugin.manifest.name}" will be disabled and uninstalled.`,
+        `"${plugin.name}" will be disabled and uninstalled.`,
         {
           title: "Uninstall plugin?",
           confirmButtonStyle: "danger",
@@ -55,7 +55,7 @@ class SettingsPluginsView extends View {
       try {
         await pluginService.uninstallPlugin(plugin.id);
         await loadPlugins();
-        showToast(`Uninstalled ${plugin.manifest.name}`);
+        showToast(`Uninstalled ${plugin.name}`);
       } finally {
         state.uninstallingIds.delete(plugin.id);
         renderPage();
@@ -104,13 +104,13 @@ class SettingsPluginsView extends View {
       try {
         const result = await pluginService.updatePlugin(plugin.id);
         if (result?.updated) {
-          showToast(`Updated ${plugin.manifest.name} to v${result.version}`, {
+          showToast(`Updated ${plugin.name} to v${result.version}`, {
             style: "success",
           });
           await loadPlugins();
         }
       } catch (e) {
-        showToast(`Failed to update ${plugin.manifest.name}`, {
+        showToast(`Failed to update ${plugin.name}`, {
           style: "error",
         });
       } finally {
@@ -151,13 +151,13 @@ class SettingsPluginsView extends View {
       try {
         if (plugin.enabled) {
           await pluginService.disablePlugin(plugin.id);
-          showToast(`Disabled ${plugin.manifest.name}`);
+          showToast(`Disabled ${plugin.name}`);
         } else {
           try {
             await pluginService.enablePlugin(plugin.id);
-            showToast(`Enabled ${plugin.manifest.name}`, { style: "success" });
+            showToast(`Enabled ${plugin.name}`, { style: "success" });
           } catch (e) {
-            showToast(`Error when loading ${plugin.manifest.name}`, {
+            showToast(`Error when loading ${plugin.name}`, {
               style: "error",
             });
           }
@@ -281,25 +281,25 @@ class SettingsPluginsView extends View {
                               >
                                 <div class="plugin-list-item-info">
                                   <div class="plugin-list-item-name">
-                                    ${plugin.manifest.name}
+                                    ${plugin.name}
                                     ${plugin.local
                                       ? html`<span class="plugin-local-badge"
                                           >local</span
                                         >`
                                       : ""}
                                   </div>
-                                  ${plugin.manifest.description
+                                  ${plugin.description
                                     ? html`<div
                                         class="plugin-list-item-description"
                                       >
-                                        ${plugin.manifest.description}
+                                        ${plugin.description}
                                       </div>`
                                     : ""}
                                   <div class="plugin-list-item-version">
-                                    Version: ${plugin.manifest.version}
+                                    Version: ${plugin.version}
                                   </div>
                                   <div class="plugin-list-item-author">
-                                    By ${plugin.manifest.author}
+                                    By ${plugin.author}
                                   </div>
                                 </div>
                                 <div class="plugin-list-item-controls">
@@ -320,23 +320,21 @@ class SettingsPluginsView extends View {
                                     ? html`<a
                                         class="plugin-settings-link"
                                         href="/settings/plugins/${plugin.id}"
-                                        aria-label="Settings for ${plugin
-                                          .manifest.name}"
+                                        aria-label="Settings for ${plugin.name}"
                                       >
                                         ${settingsIconTemplate()}
                                       </a>`
                                     : ""}
                                   <button
                                     class="plugin-uninstall-button"
-                                    aria-label="Uninstall ${plugin.manifest
-                                      .name}"
+                                    aria-label="Uninstall ${plugin.name}"
                                     @click=${() => uninstallPlugin(plugin)}
                                   >
                                     ${trashCanIconTemplate()}
                                   </button>
                                   <toggle-switch
                                     class="plugin-toggle"
-                                    label="Enable ${plugin.manifest.name}"
+                                    label="Enable ${plugin.name}"
                                     ?checked=${state.enablingIds.has(plugin.id)
                                       ? true
                                       : state.disablingIds.has(plugin.id)

@@ -256,10 +256,12 @@ export class PluginBridge {
 
   async loadPlugin(pluginId, version) {
     if (this._loadedPlugins.has(pluginId)) return;
-    const manifest = await this._provider.ensureManifest(pluginId, version);
-    if (!manifest) {
-      logger.warn(`failed to load "${pluginId}": invalid manifest`);
-      return;
+    let manifest;
+    try {
+      manifest = await this._provider.getManifest(pluginId, version);
+    } catch (error) {
+      logger.warn(`failed to load "${pluginId}": invalid manifest`, error);
+      throw new Error("Failed to load plugin manifest");
     }
     let source;
     try {
@@ -269,7 +271,7 @@ export class PluginBridge {
         `failed to load "${pluginId}": could not fetch main.js`,
         error,
       );
-      return;
+      throw new Error("Failed to load plugin source");
     }
     try {
       const pluginInstance = await PluginInstance.loadFromSource(
@@ -287,7 +289,7 @@ export class PluginBridge {
       return pluginInstance;
     } catch (error) {
       logger.error(`"${pluginId}" failed during initialization:`, error);
-      throw error;
+      throw new Error("Plugin failed during initialization");
     }
   }
 
