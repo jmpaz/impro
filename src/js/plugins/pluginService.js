@@ -340,7 +340,15 @@ export class PluginService extends EventEmitter {
   async uninstallPlugin(pluginId) {
     this.pluginBridge.unloadPlugin(pluginId);
     await this._removePluginPreferenceEntry(pluginId);
+    await this._clearPluginSettings(pluginId);
     await this._reconcileCache(this._getInstalledPluginsPreference());
+  }
+
+  async _clearPluginSettings(pluginId) {
+    const preferences = this.preferencesProvider
+      .requirePreferences()
+      .clearPluginSettings(pluginId);
+    await this.preferencesProvider.savePreferences(preferences);
   }
 
   async enablePlugin(pluginId) {

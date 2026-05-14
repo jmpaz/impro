@@ -42,7 +42,7 @@ class SettingsPluginsView extends View {
 
     async function uninstallPlugin(plugin) {
       const confirmed = await confirm(
-        `"${plugin.name}" will be disabled and uninstalled.`,
+        `"${plugin.name}" will be uninstalled and its settings will be deleted. This action cannot be undone`,
         {
           title: "Uninstall plugin?",
           confirmButtonStyle: "danger",

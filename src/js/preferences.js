@@ -468,6 +468,18 @@ export class Preferences {
     return clone;
   }
 
+  clearPluginSettings(pluginId) {
+    const clone = this.clone();
+    clone.obj = clone.obj.filter(
+      (pref) =>
+        !(
+          pref.$type === "app.bsky.actor.defs#improPluginSettingsPref" &&
+          pref.pluginId === pluginId
+        ),
+    );
+    return clone;
+  }
+
   getInstalledPlugins() {
     const pref = Preferences.getPreferenceByType(
       this.obj,

@@ -2626,6 +2626,25 @@ t.describe("Preferences plugin settings", (it) => {
     assertEquals(updated.getPluginSettings("plugin-a"), { a: 1 });
     assertEquals(updated.getPluginSettings("plugin-b"), { b: 2 });
   });
+
+  it("clears settings for a single plugin", () => {
+    const preferences = new Preferences([], [])
+      .setPluginSettings("plugin-a", { a: 1 })
+      .setPluginSettings("plugin-b", { b: 2 });
+    const updated = preferences.clearPluginSettings("plugin-a");
+    assertEquals(updated.getPluginSettings("plugin-a"), null);
+    assertEquals(updated.getPluginSettings("plugin-b"), { b: 2 });
+    // Original unchanged
+    assertEquals(preferences.getPluginSettings("plugin-a"), { a: 1 });
+  });
+
+  it("is a no-op when clearing settings for an unknown plugin", () => {
+    const preferences = new Preferences([], []).setPluginSettings("plugin-a", {
+      a: 1,
+    });
+    const updated = preferences.clearPluginSettings("plugin-b");
+    assertEquals(updated.getPluginSettings("plugin-a"), { a: 1 });
+  });
 });
 
 t.describe("Preferences installed plugins", (it) => {
