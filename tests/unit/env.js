@@ -54,6 +54,12 @@ globalThis.window.HTMLDialogElement.prototype.close = function () {
 globalThis.window.HTMLElement.prototype.showPopover = function () {};
 globalThis.window.HTMLElement.prototype.hidePopover = function () {};
 
+globalThis.window.HTMLMediaElement.prototype.play = function () {
+  return Promise.resolve();
+};
+globalThis.window.HTMLMediaElement.prototype.pause = function () {};
+globalThis.window.HTMLMediaElement.prototype.load = function () {};
+
 // Prevent network requests. We can mock this in individual tests as needed.
 delete globalThis.fetch;
 
