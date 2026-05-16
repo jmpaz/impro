@@ -45,12 +45,6 @@ class SettingsView extends View {
         enabled: true,
       },
       {
-        icon: boxIconTemplate,
-        label: "Plugins (beta)",
-        url: "/settings/plugins",
-        enabled: true,
-      },
-      {
         icon: codeIconTemplate,
         label: "Advanced",
         url: "/settings/advanced",
@@ -58,6 +52,14 @@ class SettingsView extends View {
       },
     ];
 
+    if (window.env.environment === "development") {
+      menuItems.push({
+        icon: boxIconTemplate,
+        label: "Plugins (beta)",
+        url: "/settings/plugins",
+        enabled: true,
+      });
+    }
     function renderPage() {
       const currentUser = dataLayer.selectors.getCurrentUser();
       const numNotifications =
