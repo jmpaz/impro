@@ -179,7 +179,6 @@ html {
   /* sizing */
   --font-size: 15px;
   --hair: 1px;
-  --fixed-header-height: 46px;
   --chat-detail-header-height: 56px;
   --footer-height: 55px;
   --message-input-min-height: 70px;
@@ -822,10 +821,6 @@ header {
   right: 0;
 }
 
-header.fixed-height-header {
-  height: var(--fixed-header-height);
-}
-
 #chat-detail-view .header-row {
   height: var(--chat-detail-header-height);
 }
@@ -834,12 +829,12 @@ body.scroll-locked header {
   position: fixed;
 }
 
-@media (min-width: 800px) {
+/* @media (min-width: 800px) {
   body.scroll-locked header {
     border-left: var(--hair) solid var(--post-border-color);
     border-right: var(--hair) solid var(--post-border-color);
   }
-}
+} */
 
 .header > .header-row {
   display: flex;
@@ -4104,14 +4099,10 @@ emoji-picker {
 }
 
 .search-input-container {
-  background: var(--background-color);
-  position: sticky;
-  top: var(--fixed-header-height);
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-bottom: var(--hair) solid var(--post-border-color);
-  z-index: var(--header-z-index);
 }
 
 .search-input {
@@ -4231,17 +4222,6 @@ emoji-picker {
 
 .search-post-results .feed-item:last-of-type {
   border-bottom: none;
-}
-
-.hashtag-tab-bar-container {
-  background: var(--background-color);
-  position: sticky;
-  top: var(--fixed-header-height);
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  border-bottom: var(--hair) solid var(--post-border-color);
-  z-index: var(--header-z-index);
 }
 
 .feeds-list {
