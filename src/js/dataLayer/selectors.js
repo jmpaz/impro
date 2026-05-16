@@ -606,6 +606,10 @@ export class Selectors {
     return this.dataStore.getBlockedProfiles();
   }
 
+  getMutedProfiles() {
+    return this.dataStore.getMutedProfiles();
+  }
+
   getProfileFollowers(profileDid) {
     return this.dataStore.getProfileFollowers(profileDid);
   }

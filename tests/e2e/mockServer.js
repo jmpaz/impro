@@ -26,6 +26,7 @@ export class MockServer {
     this.labelerViews = [bskyLabeler];
     this.mutedWords = [];
     this.blockedProfiles = [];
+    this.mutedProfiles = [];
     this.contentLabelPrefs = [];
     this.notifications = [];
     this.notificationCursor = undefined;
@@ -1118,6 +1119,31 @@ export class MockServer {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({ blocks, cursor: nextCursor }),
+      });
+    });
+
+    await page.route("**/xrpc/app.bsky.graph.getMutes*", (route) => {
+      const url = new URL(route.request().url());
+      const cursor = url.searchParams.get("cursor") || "";
+      const limit = parseInt(url.searchParams.get("limit") || "0", 10);
+      const offset = cursor ? parseInt(cursor, 10) : 0;
+
+      let mutes, nextCursor;
+      if (limit) {
+        mutes = this.mutedProfiles.slice(offset, offset + limit);
+        nextCursor =
+          offset + limit < this.mutedProfiles.length
+            ? String(offset + limit)
+            : "";
+      } else {
+        mutes = this.mutedProfiles;
+        nextCursor = "";
+      }
+
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ mutes, cursor: nextCursor }),
       });
     });
 

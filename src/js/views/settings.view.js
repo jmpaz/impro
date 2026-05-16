@@ -1,6 +1,7 @@
 import { View } from "/js/views/view.js";
 import { html, render } from "/js/lib/lit-html.js";
 import { eyeIconTemplate } from "/js/templates/icons/eyeIcon.template.js";
+import { eyeSlashIconTemplate } from "/js/templates/icons/eyeSlashIcon.template.js";
 import { mutedWordIconTemplate } from "/js/templates/icons/mutedWordIcon.template.js";
 import { restrictedIconTemplate } from "/js/templates/icons/restrictedIcon.template.js";
 import { codeIconTemplate } from "/js/templates/icons/codeIcon.template.js";
@@ -36,6 +37,12 @@ class SettingsView extends View {
         icon: mutedWordIconTemplate,
         label: "Muted words",
         url: "/settings/muted-words",
+        enabled: true,
+      },
+      {
+        icon: eyeSlashIconTemplate,
+        label: "Muted accounts",
+        url: "/settings/muted-accounts",
         enabled: true,
       },
       {

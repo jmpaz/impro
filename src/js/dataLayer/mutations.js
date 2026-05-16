@@ -446,6 +446,24 @@ export class Mutations {
           },
         };
       });
+      const mutedProfiles = this.dataStore.getMutedProfiles();
+      if (mutedProfiles) {
+        const alreadyListed = mutedProfiles.mutes.some(
+          (muted) => muted.did === profile.did,
+        );
+        if (!alreadyListed) {
+          this.dataStore.setMutedProfiles({
+            ...mutedProfiles,
+            mutes: [
+              {
+                ...profile,
+                viewer: { ...profile.viewer, muted: true },
+              },
+              ...mutedProfiles.mutes,
+            ],
+          });
+        }
+      }
     } catch (error) {
       console.error(error);
       throw error;
@@ -473,6 +491,15 @@ export class Mutations {
           },
         };
       });
+      const mutedProfiles = this.dataStore.getMutedProfiles();
+      if (mutedProfiles) {
+        this.dataStore.setMutedProfiles({
+          ...mutedProfiles,
+          mutes: mutedProfiles.mutes.filter(
+            (muted) => muted.did !== profile.did,
+          ),
+        });
+      }
     } catch (error) {
       console.error(error);
       throw error;

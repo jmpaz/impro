@@ -1100,6 +1100,34 @@ t.describe("getFollows", (it) => {
   });
 });
 
+t.describe("getMutes", (it) => {
+  it("should fetch muted accounts", async () => {
+    const session = createMockSession({
+      mutes: [{ did: "did:plc:a" }],
+      cursor: "next",
+    });
+    const api = new Api(session);
+
+    const result = await api.getMutes();
+
+    const { url } = session.getLastFetchOptions();
+    assert(url.includes("app.bsky.graph.getMutes"));
+    assert(url.includes("limit=50"));
+    assertEquals(result.mutes.length, 1);
+    assertEquals(result.cursor, "next");
+  });
+
+  it("should pass cursor when provided", async () => {
+    const session = createMockSession({ mutes: [], cursor: "" });
+    const api = new Api(session);
+
+    await api.getMutes({ cursor: "abc" });
+
+    const { url } = session.getLastFetchOptions();
+    assert(url.includes("cursor=abc"));
+  });
+});
+
 t.describe("muteActor", (it) => {
   it("should mute actor", async () => {
     const session = createMockSession({});

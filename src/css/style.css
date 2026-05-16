@@ -5881,7 +5881,8 @@ img[data-lightbox] {
   font-size: 14px;
 }
 
-.blocked-account-description {
+.blocked-account-description,
+.muted-account-description {
   padding: 16px 16px 16px;
   margin: 0;
   font-size: 14px;

@@ -303,6 +303,34 @@ t.describe("Profile Management", (it) => {
   });
 });
 
+t.describe("Muted Profiles Management", (it) => {
+  const mutedList = {
+    mutes: [{ did: "did:plc:a", handle: "a.bsky.social" }],
+    cursor: "next",
+  };
+
+  it("should return null before any muted profiles are set", () => {
+    const dataStore = new DataStore();
+    assertEquals(dataStore.hasMutedProfiles(), false);
+    assertEquals(dataStore.getMutedProfiles(), null);
+  });
+
+  it("should set and get muted profiles", () => {
+    const dataStore = new DataStore();
+    dataStore.setMutedProfiles(mutedList);
+    assertEquals(dataStore.hasMutedProfiles(), true);
+    assertEquals(dataStore.getMutedProfiles(), mutedList);
+  });
+
+  it("should clear muted profiles", () => {
+    const dataStore = new DataStore();
+    dataStore.setMutedProfiles(mutedList);
+    dataStore.clearMutedProfiles();
+    assertEquals(dataStore.hasMutedProfiles(), false);
+    assertEquals(dataStore.getMutedProfiles(), null);
+  });
+});
+
 t.describe("Event Handling", (it) => {
   it("should handle multiple event listeners", () => {
     const dataStore = new DataStore();

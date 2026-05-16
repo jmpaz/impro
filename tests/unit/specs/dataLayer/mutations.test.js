@@ -1248,4 +1248,121 @@ t.describe("unpinPost", (it) => {
   });
 });
 
+t.describe("muteProfile", (it) => {
+  const profile = {
+    did: "did:plc:target",
+    handle: "target.bsky.social",
+    viewer: {},
+  };
+
+  function setup(mockApi = {}) {
+    const dataStore = new DataStore();
+    const patchStore = new PatchStore();
+    const mockPreferencesProvider = {
+      requirePreferences: () => Preferences.createLoggedOutPreferences(),
+    };
+    const mutations = new Mutations(
+      { muteActor: async () => ({}), ...mockApi },
+      dataStore,
+      patchStore,
+      mockPreferencesProvider,
+    );
+    return { mutations, dataStore };
+  }
+
+  it("should set viewer.muted on the profile", async () => {
+    const { mutations, dataStore } = setup();
+    await mutations.muteProfile(profile);
+    assertEquals(dataStore.getProfile(profile.did).viewer.muted, true);
+  });
+
+  it("should prepend muted profile to the cached list", async () => {
+    const { mutations, dataStore } = setup();
+    const existing = { did: "did:plc:other", viewer: { muted: true } };
+    dataStore.setMutedProfiles({ mutes: [existing], cursor: "abc" });
+
+    await mutations.muteProfile(profile);
+
+    const stored = dataStore.getMutedProfiles();
+    assertEquals(stored.mutes.length, 2);
+    assertEquals(stored.mutes[0].did, profile.did);
+    assertEquals(stored.mutes[0].viewer.muted, true);
+    assertEquals(stored.mutes[1].did, existing.did);
+    assertEquals(stored.cursor, "abc");
+  });
+
+  it("should not duplicate when already present in the cached list", async () => {
+    const { mutations, dataStore } = setup();
+    dataStore.setMutedProfiles({
+      mutes: [{ ...profile, viewer: { muted: true } }],
+      cursor: null,
+    });
+
+    await mutations.muteProfile(profile);
+
+    assertEquals(dataStore.getMutedProfiles().mutes.length, 1);
+  });
+
+  it("should not initialize the cached list if it was not loaded", async () => {
+    const { mutations, dataStore } = setup();
+    await mutations.muteProfile(profile);
+    assertEquals(dataStore.getMutedProfiles(), null);
+  });
+});
+
+t.describe("unmuteProfile", (it) => {
+  const profile = {
+    did: "did:plc:target",
+    handle: "target.bsky.social",
+    viewer: { muted: true },
+  };
+
+  function setup(mockApi = {}) {
+    const dataStore = new DataStore();
+    const patchStore = new PatchStore();
+    const mockPreferencesProvider = {
+      requirePreferences: () => Preferences.createLoggedOutPreferences(),
+    };
+    const mutations = new Mutations(
+      { unmuteActor: async () => ({}), ...mockApi },
+      dataStore,
+      patchStore,
+      mockPreferencesProvider,
+    );
+    return { mutations, dataStore };
+  }
+
+  it("should clear viewer.muted on the profile", async () => {
+    const { mutations, dataStore } = setup();
+    await mutations.unmuteProfile(profile);
+    assertEquals(dataStore.getProfile(profile.did).viewer.muted, false);
+  });
+
+  it("should remove profile from the cached list", async () => {
+    const { mutations, dataStore } = setup();
+    const other = { did: "did:plc:other", viewer: { muted: true } };
+    dataStore.setMutedProfiles({
+      mutes: [profile, other],
+      cursor: "abc",
+    });
+
+    await mutations.unmuteProfile(profile);
+
+    const stored = dataStore.getMutedProfiles();
+    assertEquals(stored.mutes.length, 1);
+    assertEquals(stored.mutes[0].did, other.did);
+    assertEquals(stored.cursor, "abc");
+  });
+
+  it("should be a no-op on the cached list when not present", async () => {
+    const { mutations, dataStore } = setup();
+    const other = { did: "did:plc:other", viewer: { muted: true } };
+    dataStore.setMutedProfiles({ mutes: [other], cursor: null });
+
+    await mutations.unmuteProfile(profile);
+
+    assertEquals(dataStore.getMutedProfiles().mutes.length, 1);
+  });
+});
+
 await t.run();

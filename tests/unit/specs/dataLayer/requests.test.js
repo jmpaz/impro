@@ -418,4 +418,80 @@ t.describe("loadLabelerInfo", (it) => {
   });
 });
 
+t.describe("loadMutedProfiles", (it) => {
+  it("should store muted profiles on first load", async () => {
+    const res = {
+      mutes: [{ did: "did:plc:a" }, { did: "did:plc:b" }],
+      cursor: "next",
+    };
+    const mockApi = { getMutes: async () => res };
+    const dataStore = new DataStore();
+    const mockPreferencesProvider = {
+      requirePreferences: () => Preferences.createLoggedOutPreferences(),
+    };
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
+
+    await requests.loadMutedProfiles();
+
+    assertEquals(dataStore.getMutedProfiles(), res);
+  });
+
+  it("should append paginated muted profiles when cursor is provided", async () => {
+    const dataStore = new DataStore();
+    dataStore.setMutedProfiles({
+      mutes: [{ did: "did:plc:a" }],
+      cursor: "page2",
+    });
+
+    const mockApi = {
+      getMutes: async () => ({
+        mutes: [{ did: "did:plc:b" }],
+        cursor: undefined,
+      }),
+    };
+    const mockPreferencesProvider = {
+      requirePreferences: () => Preferences.createLoggedOutPreferences(),
+    };
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
+
+    await requests.loadMutedProfiles({ cursor: "page2" });
+
+    const stored = dataStore.getMutedProfiles();
+    assertEquals(stored.mutes.length, 2);
+    assertEquals(stored.mutes[0].did, "did:plc:a");
+    assertEquals(stored.mutes[1].did, "did:plc:b");
+  });
+
+  it("should pass cursor through to the api", async () => {
+    let capturedCursor;
+    const mockApi = {
+      getMutes: async ({ cursor }) => {
+        capturedCursor = cursor;
+        return { mutes: [], cursor: undefined };
+      },
+    };
+    const dataStore = new DataStore();
+    dataStore.setMutedProfiles({ mutes: [], cursor: "abc" });
+    const mockPreferencesProvider = {
+      requirePreferences: () => Preferences.createLoggedOutPreferences(),
+    };
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
+
+    await requests.loadMutedProfiles({ cursor: "abc" });
+    assertEquals(capturedCursor, "abc");
+  });
+});
+
 await t.run();
