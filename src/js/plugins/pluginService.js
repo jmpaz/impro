@@ -13,6 +13,13 @@ import { compareVersions, isDev } from "/js/utils.js";
 import { EventEmitter } from "/js/eventEmitter.js";
 import { PLUGIN_REGISTRY_URL } from "/js/config.js";
 
+const DISABLE_PLUGINS_QUERY_PARAM = "disable-plugins";
+
+export function arePluginsDisabledByQueryParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.has(DISABLE_PLUGINS_QUERY_PARAM);
+}
+
 export class PluginService extends EventEmitter {
   constructor(preferencesProvider, session) {
     super();
@@ -152,6 +159,13 @@ export class PluginService extends EventEmitter {
   }
 
   async loadEnabledPlugins() {
+    if (arePluginsDisabledByQueryParam()) {
+      const enabledPluginIds = this.prefManager
+        .getEnabledPlugins()
+        .map((entry) => entry.id);
+      await this.prefManager.setPluginsDisabled(enabledPluginIds);
+      return;
+    }
     const enabledPlugins = this.prefManager
       .getEnabledPlugins()
       .filter(

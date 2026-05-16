@@ -322,6 +322,64 @@ t.describe("loadEnabledPlugins", (it) => {
     );
   });
 
+  it("with ?disable-plugins, disables all enabled plugins in one save and skips loading", async () => {
+    const { service, state } = makeService();
+    state.installedPlugins = [
+      { id: "a", version: "1.0.0", repo: "ow/a", enabled: true },
+      { id: "b", version: "1.0.0", repo: "ow/b", enabled: false },
+      { id: "c", version: "1.0.0", repo: "ow/c", enabled: true },
+    ];
+    const loadPluginsCalls = [];
+    service.pluginBridge.loadPlugins = async (entries) => {
+      loadPluginsCalls.push(entries);
+      return { loadedPlugins: entries, erroredPlugins: [] };
+    };
+    let saveCalls = 0;
+    const originalSave =
+      service.prefManager.preferencesProvider.savePreferences;
+    service.prefManager.preferencesProvider.savePreferences = async (prefs) => {
+      saveCalls++;
+      return originalSave(prefs);
+    };
+    window.history.replaceState({}, "", "http://localhost/?disable-plugins");
+    try {
+      await service.loadEnabledPlugins();
+    } finally {
+      window.history.replaceState({}, "", "http://localhost/");
+    }
+    assertEquals(loadPluginsCalls.length, 0);
+    assertEquals(saveCalls, 1);
+    assertEquals(state.installedPlugins, [
+      { id: "a", version: "1.0.0", repo: "ow/a", enabled: false },
+      { id: "b", version: "1.0.0", repo: "ow/b", enabled: false },
+      { id: "c", version: "1.0.0", repo: "ow/c", enabled: false },
+    ]);
+  });
+
+  it("with ?disable-plugins and no enabled plugins, performs no save and no load", async () => {
+    const { service, state } = makeService();
+    state.installedPlugins = [
+      { id: "a", version: "1.0.0", repo: "ow/a", enabled: false },
+    ];
+    const loadPluginsCalls = [];
+    service.pluginBridge.loadPlugins = async (entries) => {
+      loadPluginsCalls.push(entries);
+      return { loadedPlugins: entries, erroredPlugins: [] };
+    };
+    let saveCalls = 0;
+    service.prefManager.preferencesProvider.savePreferences = async () => {
+      saveCalls++;
+    };
+    window.history.replaceState({}, "", "http://localhost/?disable-plugins");
+    try {
+      await service.loadEnabledPlugins();
+    } finally {
+      window.history.replaceState({}, "", "http://localhost/");
+    }
+    assertEquals(loadPluginsCalls.length, 0);
+    assertEquals(saveCalls, 0);
+  });
+
   it("reconciles cache against all installed (including disabled)", async () => {
     const { service, state, reconcileCalls } = makeService();
     state.installedPlugins = [
