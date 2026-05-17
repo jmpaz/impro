@@ -244,6 +244,9 @@ export class MockServer {
         body: getTestPluginSource(),
       }),
     );
+    await page.route("**/raw.githubusercontent.com/*/*/*/styles.css", (route) =>
+      route.fulfill({ status: 404, body: "Not Found" }),
+    );
     await page.route(
       "**/raw.githubusercontent.com/*/*/main/manifest.json",
       (route) => {
