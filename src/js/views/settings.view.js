@@ -6,7 +6,7 @@ import { mutedWordIconTemplate } from "/js/templates/icons/mutedWordIcon.templat
 import { restrictedIconTemplate } from "/js/templates/icons/restrictedIcon.template.js";
 import { codeIconTemplate } from "/js/templates/icons/codeIcon.template.js";
 import { boxIconTemplate } from "/js/templates/icons/boxIcon.template.js";
-import { getAuth, requireAuth } from "/js/auth.js";
+import { auth } from "/js/auth.js";
 import { headerTemplate } from "/js/templates/header.template.js";
 import { chevronRightIconTemplate } from "/js/templates/icons/chevronRight.template.js";
 import { classnames } from "/js/utils.js";
@@ -24,7 +24,7 @@ class SettingsView extends View {
       pluginService,
     },
   }) {
-    await requireAuth();
+    await auth.requireAuth();
 
     const menuItems = [
       {
@@ -139,7 +139,6 @@ class SettingsView extends View {
                       ) {
                         return;
                       }
-                      const auth = await getAuth();
                       await auth.logout();
                       window.location.reload();
                     }}

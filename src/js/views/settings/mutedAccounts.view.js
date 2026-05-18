@@ -1,7 +1,7 @@
 import { View } from "/js/views/view.js";
 import { html, render } from "/js/lib/lit-html.js";
 import { headerTemplate } from "/js/templates/header.template.js";
-import { requireAuth } from "/js/auth.js";
+import { auth } from "/js/auth.js";
 import { mainLayoutTemplate } from "/js/templates/mainLayout.template.js";
 import { profileFeedTemplate } from "/js/templates/profileFeed.template.js";
 import "/js/components/infinite-scroll-container.js";
@@ -17,7 +17,7 @@ class SettingsMutedAccountsView extends View {
       pluginService,
     },
   }) {
-    await requireAuth();
+    await auth.requireAuth();
 
     async function loadMore() {
       const mutedProfiles = dataLayer.selectors.getMutedProfiles();

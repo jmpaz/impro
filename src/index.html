@@ -93,7 +93,7 @@
       import { IdentityResolver } from "/js/atproto.js";
       import { Router } from "/js/router.js";
       import { Api } from "/js/api.js";
-      import { getAuth, OAuth } from "/js/auth.js";
+      import { auth } from "/js/auth.js";
       import { NotificationService } from "/js/notificationService.js";
       import { ChatNotificationService } from "/js/chatNotificationService.js";
       import { PostComposerService } from "/js/postComposerService.js";
@@ -125,7 +125,8 @@
 
         handleAppViewResetQueryParam();
 
-        const auth = await getAuth();
+        await auth.handleForceLogoutParam();
+
         const session = await auth.getSession();
         const appViewConfig = getAppViewConfig();
         const api = new Api(session ?? null, {

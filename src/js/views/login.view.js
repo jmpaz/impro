@@ -1,8 +1,7 @@
 import { View } from "/js/views/view.js";
 import {
-  getAuth,
-  requireNoAuth,
-  BasicAuth,
+  auth,
+  BasicAuthProvider,
   InvalidUsernameError,
   AuthError,
 } from "/js/auth.js";
@@ -19,7 +18,7 @@ import { validateReturnToParam } from "/js/navigation.js";
 
 class LoginView extends View {
   async render({ root, params, context }) {
-    await requireNoAuth();
+    await auth.requireNoAuth();
 
     const storedConfig = getAppViewConfig();
     const isStoredCustom = storedConfig.id === CUSTOM_APP_VIEW_CONFIG_ID;
@@ -40,8 +39,7 @@ class LoginView extends View {
       return validateReturnToParam(params.get("returnTo"));
     }
 
-    const auth = await getAuth();
-    const isBasicAuth = auth instanceof BasicAuth;
+    const isBasicAuth = auth.provider instanceof BasicAuthProvider;
 
     function resolveSelectedAppViewConfig() {
       if (state.appViewSelection === CUSTOM_APP_VIEW_CONFIG_ID) {
@@ -83,7 +81,11 @@ class LoginView extends View {
           fullHandle = fullHandle.slice(1);
         }
         const returnTo = getCurrentReturnTo();
-        await auth.login(fullHandle, password, { returnTo });
+        if (isBasicAuth) {
+          await auth.provider.login(fullHandle, password);
+        } else {
+          await auth.provider.login(fullHandle, { returnTo });
+        }
         window.location.href = returnTo ?? "/";
       } catch (error) {
         if (error instanceof InvalidUsernameError) {

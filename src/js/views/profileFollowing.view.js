@@ -1,5 +1,5 @@
 import { html, render } from "/js/lib/lit-html.js";
-import { requireAuth } from "/js/auth.js";
+import { auth } from "/js/auth.js";
 import { View } from "/js/views/view.js";
 import { mainLayoutTemplate } from "/js/templates/mainLayout.template.js";
 import { headerTemplate } from "/js/templates/header.template.js";
@@ -20,7 +20,7 @@ class ProfileFollowingView extends View {
       pluginService,
     },
   }) {
-    await requireAuth();
+    await auth.requireAuth();
 
     const { handleOrDid } = params;
 
