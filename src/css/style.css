@@ -6109,10 +6109,6 @@ moderation-warning .toggle-content {
   }
 }
 
-#login-form .button-group {
-  margin-top: 4px;
-}
-
 .select-wrapper {
   position: relative;
   width: 100%;
@@ -7629,4 +7625,8 @@ image-cropper {
 .plugin-reload-button .icon {
   width: 24px;
   height: 24px;
+}
+
+.modal-dialog.confirm-modal {
+  max-width: 320px;
 }

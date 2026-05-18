@@ -106,7 +106,7 @@ export async function confirm(
 ) {
   return new Promise((resolve) => {
     const dialog = document.createElement("dialog");
-    dialog.classList.add("modal-dialog");
+    dialog.classList.add("modal-dialog", "confirm-modal");
 
     render(
       html`
