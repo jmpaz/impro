@@ -589,6 +589,12 @@ form button:disabled {
   }
 }
 
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: var(--text-color-muted);
