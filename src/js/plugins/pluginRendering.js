@@ -92,9 +92,7 @@ function resolveTag(node, pluginId) {
   return tag;
 }
 
-// Render a serialized VirtualEl node ({ tag, attrs, text, children }) into a
-// real element. Text and children are mutually exclusive on
-// the worker side (setText() clears children).
+// Render a serialized VirtualEl node ({ tag, attrs, text, children }) into a DOM element.
 export class PluginRenderer {
   constructor(pluginBridge, pluginId) {
     this.pluginBridge = pluginBridge;
@@ -146,10 +144,15 @@ export class PluginRenderer {
       }
     }
     this._patchEvents(element, null, node.events, pluginId);
-    if (node.text != null) {
+    const children = Array.isArray(node.children) ? node.children : [];
+    const hasText = node.text != null && node.text !== "";
+    if (hasText && children.length === 0) {
       element.textContent = node.text;
-    } else if (Array.isArray(node.children)) {
-      for (const child of node.children) {
+    } else {
+      if (hasText) {
+        element.appendChild(document.createTextNode(node.text));
+      }
+      for (const child of children) {
         element.appendChild(this._create(child, pluginId));
       }
     }
@@ -180,23 +183,61 @@ export class PluginRenderer {
 
     this._patchEvents(element, oldNode.events, newNode.events, pluginId);
 
-    if (newNode.text != null) {
-      if (newNode.text !== oldNode.text) element.textContent = newNode.text;
+    const oldChildren = Array.isArray(oldNode.children) ? oldNode.children : [];
+    const newChildren = Array.isArray(newNode.children) ? newNode.children : [];
+    const oldHasText = oldNode.text != null && oldNode.text !== "";
+    const newHasText = newNode.text != null && newNode.text !== "";
+
+    // Fast path: text-only on both sides.
+    if (oldChildren.length === 0 && newChildren.length === 0) {
+      if (newHasText) {
+        if (newNode.text !== oldNode.text) element.textContent = newNode.text;
+      } else if (oldHasText) {
+        element.textContent = "";
+      }
       return;
     }
 
-    const oldChildren = Array.isArray(oldNode.children) ? oldNode.children : [];
-    const newChildren = Array.isArray(newNode.children) ? newNode.children : [];
-    // If old node had text, clear it before reconciling children.
-    if (oldNode.text != null) {
+    // If the children-vs-text shape changed dramatically, rebuild content.
+    const oldHadOnlyText = oldChildren.length === 0 && oldHasText;
+    const newHasOnlyText = newChildren.length === 0 && newHasText;
+    if (oldHadOnlyText || newHasOnlyText) {
       element.textContent = "";
+      if (newHasText) {
+        element.appendChild(document.createTextNode(newNode.text));
+      }
+      for (const child of newChildren) {
+        element.appendChild(this._create(child, pluginId));
+      }
+      return;
     }
+
+    // Both sides have element children — manage the optional leading text node.
+    let textOffset = 0;
+    const firstIsTextNode =
+      element.firstChild && element.firstChild.nodeType === Node.TEXT_NODE;
+    if (newHasText) {
+      if (firstIsTextNode) {
+        if (element.firstChild.textContent !== newNode.text) {
+          element.firstChild.textContent = newNode.text;
+        }
+      } else {
+        element.insertBefore(
+          document.createTextNode(newNode.text),
+          element.firstChild,
+        );
+      }
+      textOffset = 1;
+    } else if (oldHasText && firstIsTextNode) {
+      element.removeChild(element.firstChild);
+    }
+
     const domChildren = Array.from(element.childNodes);
     const max = Math.max(oldChildren.length, newChildren.length);
     for (let index = 0; index < max; index++) {
       const oldChild = oldChildren[index];
       const newChild = newChildren[index];
-      const domChild = domChildren[index];
+      const domChild = domChildren[index + textOffset];
       if (!oldChild && newChild) {
         element.appendChild(this._create(newChild, pluginId));
       } else if (oldChild && !newChild) {

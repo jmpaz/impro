@@ -174,6 +174,92 @@ t.describe("PluginRenderer:root reconciliation", (it) => {
     assertEquals(element.textContent, "");
   });
 
+  it("renders both text and children with text as a leading text node", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo");
+    const root = renderer.createRoot();
+    const element = root.render({
+      tag: "button",
+      text: "Applying",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    assertEquals(element.childNodes.length, 2);
+    assertEquals(element.firstChild.nodeType, 3);
+    assertEquals(element.firstChild.textContent, "Applying");
+    assertEquals(element.children.length, 1);
+    assertEquals(element.children[0].tagName.toLowerCase(), "div");
+    assertEquals(element.children[0].getAttribute("class"), "loading-spinner");
+  });
+
+  it("patches from text-only to text-plus-children, preserving spinner child", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo");
+    const root = renderer.createRoot();
+    const element = root.render({ tag: "button", text: "Apply" });
+    assertEquals(element.textContent, "Apply");
+    root.render({
+      tag: "button",
+      text: "Applying",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    assertEquals(element.children.length, 1);
+    assertEquals(element.firstChild.nodeType, 3);
+    assertEquals(element.firstChild.textContent, "Applying");
+    assertEquals(element.children[0].getAttribute("class"), "loading-spinner");
+  });
+
+  it("patches from text-plus-children back to text-only, removing the child", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo");
+    const root = renderer.createRoot();
+    const element = root.render({
+      tag: "button",
+      text: "Applying",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    root.render({ tag: "button", text: "Apply" });
+    assertEquals(element.children.length, 0);
+    assertEquals(element.textContent, "Apply");
+  });
+
+  it("updates the leading text node in place when children stay stable", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo");
+    const root = renderer.createRoot();
+    const element = root.render({
+      tag: "button",
+      text: "Applying",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    const originalSpinner = element.children[0];
+    root.render({
+      tag: "button",
+      text: "Working",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    assertEquals(element.firstChild.textContent, "Working");
+    assert(element.children[0] === originalSpinner);
+  });
+
+  it("removes the leading text node while keeping element children", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo");
+    const root = renderer.createRoot();
+    const element = root.render({
+      tag: "button",
+      text: "Applying",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    const originalSpinner = element.children[0];
+    root.render({
+      tag: "button",
+      children: [{ tag: "div", attrs: { class: "loading-spinner" } }],
+    });
+    assertEquals(element.childNodes.length, 1);
+    assertEquals(element.children.length, 1);
+    assert(element.children[0] === originalSpinner);
+  });
+
   it("replaces a child whose tag no longer matches", () => {
     const { bridge } = makeBridge();
     const renderer = new PluginRenderer(bridge, "demo");
