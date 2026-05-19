@@ -68,11 +68,20 @@ export class PluginService extends EventEmitter {
       this.sourceProvider,
       this.pluginStylesLoader,
     );
-    this.pluginRenderer = new PluginRenderer(this.pluginBridge);
+    this._pluginRenderers = new Map();
     this.prefManager = new PluginPreferencesManager(preferencesProvider);
     this.session = session;
     this._setupRegistries();
     this._setupHostMethods();
+  }
+
+  getRenderer(pluginId) {
+    let renderer = this._pluginRenderers.get(pluginId);
+    if (!renderer) {
+      renderer = new PluginRenderer(this.pluginBridge, pluginId);
+      this._pluginRenderers.set(pluginId, renderer);
+    }
+    return renderer;
   }
 
   _setupRegistries() {
@@ -132,7 +141,7 @@ export class PluginService extends EventEmitter {
       "openModal",
       (plugin, { modalId, title, content }) => {
         showPluginModal({
-          pluginRenderer: this.pluginRenderer,
+          pluginRenderer: this.getRenderer(plugin.pluginId),
           pluginId: plugin.pluginId,
           modalId,
           title,
@@ -191,7 +200,7 @@ export class PluginService extends EventEmitter {
       "showToast",
       (plugin, { toastId, element, timeout }) => {
         showPluginToast({
-          pluginRenderer: this.pluginRenderer,
+          pluginRenderer: this.getRenderer(plugin.pluginId),
           pluginId: plugin.pluginId,
           toastId,
           element,
@@ -417,6 +426,7 @@ export class PluginService extends EventEmitter {
 
   async uninstallPlugin(pluginId) {
     this.pluginBridge.unloadPlugin(pluginId);
+    this._pluginRenderers.delete(pluginId);
     await this.prefManager.removeInstalledPlugin(pluginId);
     await this.prefManager.clearSettingsForPlugin(pluginId);
     await this._reconcileCache(this.prefManager.getInstalledPlugins());
@@ -439,6 +449,7 @@ export class PluginService extends EventEmitter {
 
   async disablePlugin(pluginId) {
     this.pluginBridge.unloadPlugin(pluginId);
+    this._pluginRenderers.delete(pluginId);
     await this.prefManager.setPluginDisabled(pluginId);
   }
 
