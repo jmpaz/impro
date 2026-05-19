@@ -304,10 +304,11 @@ class SettingsPluginsView extends View {
                                         @click=${() => updatePlugin(plugin)}
                                       >
                                         ${isUpdating
-                                          ? html`<div
-                                              class="loading-spinner"
-                                              data-testid="loading-spinner"
-                                            ></div>`
+                                          ? html`Updating
+                                              <div
+                                                class="loading-spinner"
+                                                data-testid="loading-spinner"
+                                              ></div>`
                                           : "Update"}
                                       </button>`
                                     : ""}
