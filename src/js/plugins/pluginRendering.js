@@ -1,6 +1,7 @@
 import { lightningBoltIconTemplate } from "/js/templates/icons/lightningBoltIcon.template.js";
 import { showExternalLinkWarningModal } from "/js/modals.js";
 import "/js/components/toggle-switch.js";
+import "/js/components/plugin-profiles-list.js";
 
 function isExternalHref(href) {
   try {
@@ -36,6 +37,7 @@ const ALLOWED_TAGS = [
   "label",
   "textarea",
   "a",
+  "profiles-list",
 ];
 
 const ALLOWED_EVENTS = ["click", "change", "input"];
@@ -60,6 +62,7 @@ const ALLOWED_ATTRS = [
   "for",
   "id",
   "href",
+  "dids",
 ];
 
 function isSafeHref(value) {
@@ -110,14 +113,16 @@ function resolveTag(node, pluginId) {
     tag = "span";
   }
   if (tag === "input" && node.attrs?.type === "checkbox") tag = "toggle-switch";
+  if (tag === "profiles-list") tag = "plugin-profiles-list";
   return tag;
 }
 
 // Render a serialized VirtualEl node ({ tag, attrs, text, children }) into a DOM element.
 export class PluginRenderer {
-  constructor(pluginBridge, pluginId) {
+  constructor(pluginBridge, pluginId, dataLayer = null) {
     this.pluginBridge = pluginBridge;
     this.pluginId = pluginId;
+    this.dataLayer = dataLayer;
   }
 
   createRoot() {
@@ -155,6 +160,14 @@ export class PluginRenderer {
         event.preventDefault();
         showExternalLinkWarningModal({ href });
       });
+    }
+    if (tag === "plugin-profiles-list") {
+      if (!this.dataLayer) {
+        throw new Error(
+          `[plugins] "${pluginId}" rendered <profiles-list> but the renderer was created without a dataLayer`,
+        );
+      }
+      element.dataLayer = this.dataLayer;
     }
     if (tag === "toggle-switch") {
       // toggle-switch is controlled — flip its state here since the plugin

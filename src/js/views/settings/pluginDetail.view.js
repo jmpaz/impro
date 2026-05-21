@@ -60,7 +60,7 @@ class SettingsPluginDetailView extends View {
       }
     });
 
-    const tabRoot = pluginService.getRenderer(pluginId).createRoot();
+    const tabRoot = pluginService.getRenderer(pluginId, dataLayer).createRoot();
 
     function renderTabContent(containerNode) {
       if (!containerNode) return null;

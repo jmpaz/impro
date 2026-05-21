@@ -68,20 +68,14 @@ export class PluginService extends EventEmitter {
       this.sourceProvider,
       this.pluginStylesLoader,
     );
-    this._pluginRenderers = new Map();
     this.prefManager = new PluginPreferencesManager(preferencesProvider);
     this.session = session;
     this._setupRegistries();
     this._setupHostMethods();
   }
 
-  getRenderer(pluginId) {
-    let renderer = this._pluginRenderers.get(pluginId);
-    if (!renderer) {
-      renderer = new PluginRenderer(this.pluginBridge, pluginId);
-      this._pluginRenderers.set(pluginId, renderer);
-    }
-    return renderer;
+  getRenderer(pluginId, dataLayer = null) {
+    return new PluginRenderer(this.pluginBridge, pluginId, dataLayer);
   }
 
   _setupRegistries() {
@@ -427,7 +421,6 @@ export class PluginService extends EventEmitter {
 
   async uninstallPlugin(pluginId) {
     this.pluginBridge.unloadPlugin(pluginId);
-    this._pluginRenderers.delete(pluginId);
     await this.prefManager.removeInstalledPlugin(pluginId);
     await this.prefManager.clearSettingsForPlugin(pluginId);
     await this._reconcileCache(this.prefManager.getInstalledPlugins());
@@ -450,7 +443,6 @@ export class PluginService extends EventEmitter {
 
   async disablePlugin(pluginId) {
     this.pluginBridge.unloadPlugin(pluginId);
-    this._pluginRenderers.delete(pluginId);
     await this.prefManager.setPluginDisabled(pluginId);
   }
 

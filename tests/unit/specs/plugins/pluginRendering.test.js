@@ -34,6 +34,45 @@ t.describe("PluginRenderer:render with fresh roots", (it) => {
       .render({ tag: "input", attrs: { type: "checkbox" } });
     assertEquals(element.tagName.toLowerCase(), "toggle-switch");
   });
+
+  it("rewrites <profiles-list> as <plugin-profiles-list> and passes dataLayer", () => {
+    const { bridge } = makeBridge();
+    const dataLayer = { declarative: { ensureProfiles: async () => [] } };
+    const renderer = new PluginRenderer(bridge, "demo", dataLayer);
+    const element = renderer.createRoot().render({
+      tag: "profiles-list",
+      attrs: { dids: "did:test:a,did:test:b" },
+    });
+    assertEquals(element.tagName.toLowerCase(), "plugin-profiles-list");
+    assertEquals(element.getAttribute("dids"), "did:test:a,did:test:b");
+    assert(element.dataLayer === dataLayer);
+  });
+
+  it("drops disallowed attributes from <profiles-list>", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo", {});
+    const element = renderer.createRoot().render({
+      tag: "profiles-list",
+      attrs: { dids: "did:test:a", onclick: "alert(1)" },
+    });
+    assert(!element.hasAttribute("onclick"));
+  });
+
+  it("throws when rendering <profiles-list> without a dataLayer", () => {
+    const { bridge } = makeBridge();
+    const renderer = new PluginRenderer(bridge, "demo");
+    let error = null;
+    try {
+      renderer.createRoot().render({
+        tag: "profiles-list",
+        attrs: { dids: "did:test:a" },
+      });
+    } catch (e) {
+      error = e;
+    }
+    assert(error !== null);
+    assert(error.message.includes("dataLayer"));
+  });
 });
 
 t.describe("PluginRenderer:root reconciliation", (it) => {

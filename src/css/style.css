@@ -7531,9 +7531,9 @@ image-cropper {
   margin: 8px 0;
 }
 
-.plugin-settings-tab a {
+/* .plugin-settings-tab a {
   color: var(--text-link-color);
-}
+} */
 
 .plugin-setting-item {
   display: flex;
