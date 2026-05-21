@@ -216,39 +216,36 @@ export class MockServer {
           body: JSON.stringify(this.registryEntries),
         }),
     );
-    await page.route(
-      "**/raw.githubusercontent.com/*/*/*/manifest.json",
-      (route) => {
-        const match = route
-          .request()
-          .url()
-          .match(/\/([^/]+)\/manifest\.json$/);
-        const version = match?.[1] ?? "0.0.0";
-        const id = this.registryEntries[0]?.id ?? "remote-plugin";
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            id,
-            name: this.registryEntries[0]?.name ?? "Remote Plugin",
-            version,
-            description: this.registryEntries[0]?.description,
-          }),
-        });
-      },
-    );
-    await page.route("**/raw.githubusercontent.com/*/*/*/main.js", (route) =>
+    await page.route("**/cdn.jsdelivr.net/gh/*/*@*/manifest.json", (route) => {
+      const match = route
+        .request()
+        .url()
+        .match(/@([^/]+)\/manifest\.json$/);
+      const version = match?.[1] ?? "0.0.0";
+      const id = this.registryEntries[0]?.id ?? "remote-plugin";
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id,
+          name: this.registryEntries[0]?.name ?? "Remote Plugin",
+          version,
+          description: this.registryEntries[0]?.description,
+        }),
+      });
+    });
+    await page.route("**/cdn.jsdelivr.net/gh/*/*@*/main.js", (route) =>
       route.fulfill({
         status: 200,
         contentType: "text/javascript",
         body: getTestPluginSource(),
       }),
     );
-    await page.route("**/raw.githubusercontent.com/*/*/*/styles.css", (route) =>
+    await page.route("**/cdn.jsdelivr.net/gh/*/*@*/styles.css", (route) =>
       route.fulfill({ status: 404, body: "Not Found" }),
     );
     await page.route(
-      "**/raw.githubusercontent.com/*/*/main/manifest.json",
+      "**/cdn.jsdelivr.net/gh/*/*@main/manifest.json",
       (route) => {
         const live = this.liveManifest ?? {
           id: this.registryEntries[0]?.id ?? "remote-plugin",
