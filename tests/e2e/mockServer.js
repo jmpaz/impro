@@ -208,7 +208,7 @@ export class MockServer {
     // Remote plugin registry routes — serve a fake registry and matching
     // GitHub release assets so flow tests can install remote plugins.
     await page.route(
-      "**/improsocial/impro-releases@*/community-plugins.json",
+      "**/improsocial/impro-releases/main/community-plugins.json",
       (route) =>
         route.fulfill({
           status: 200,
@@ -245,7 +245,7 @@ export class MockServer {
       route.fulfill({ status: 404, body: "Not Found" }),
     );
     await page.route(
-      "**/cdn.jsdelivr.net/gh/*/*@main/manifest.json",
+      "**/raw.githubusercontent.com/*/*/main/manifest.json",
       (route) => {
         const live = this.liveManifest ?? {
           id: this.registryEntries[0]?.id ?? "remote-plugin",

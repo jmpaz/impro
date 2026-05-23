@@ -241,6 +241,41 @@ t.describe("SourceProvider with remote plugins", (it) => {
     assertEquals(styles, "body{color:blue}");
   });
 
+  it("getLiveManifest fetches from githubusercontent main branch", async () => {
+    const stub = stubFetch(async () =>
+      jsonResponse({ id: "alpha", name: "A", version: "9.9.9" }),
+    );
+    try {
+      const provider = new SourceProvider(null);
+      const manifest = await provider.getLiveManifest("alpha", "ow/alpha");
+      assertEquals(
+        stub.calls[0].url,
+        "https://raw.githubusercontent.com/ow/alpha/main/manifest.json",
+      );
+      assertEquals(stub.calls[0].options?.cache, "no-store");
+      assertEquals(manifest.version, "9.9.9");
+    } finally {
+      stub.restore();
+    }
+  });
+
+  it("getLiveManifestFromRepo fetches from githubusercontent main branch", async () => {
+    const stub = stubFetch(async () =>
+      jsonResponse({ id: "alpha", name: "A", version: "1.0.0" }),
+    );
+    try {
+      const provider = new SourceProvider(null);
+      const manifest = await provider.getLiveManifestFromRepo("ow/alpha");
+      assertEquals(
+        stub.calls[0].url,
+        "https://raw.githubusercontent.com/ow/alpha/main/manifest.json",
+      );
+      assertEquals(manifest.id, "alpha");
+    } finally {
+      stub.restore();
+    }
+  });
+
   it("getStyles returns null when remote styles.css 404s", async () => {
     const pluginCache = fakePluginCache(async () => {
       const error = new Error(

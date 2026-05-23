@@ -11,7 +11,7 @@ export const CHAT_MESSAGES_PAGE_SIZE = 100;
 
 // Plugins
 export const PLUGIN_REGISTRY_URL =
-  "https://cdn.jsdelivr.net/gh/improsocial/impro-releases@main/community-plugins.json";
+  "https://raw.githubusercontent.com/improsocial/impro-releases/main/community-plugins.json";
 
 // Appview dids
 export const BSKY_APPVIEW_SERVICE_DID = "did:web:api.bsky.app#bsky_appview";
