@@ -12,6 +12,7 @@ import {
   isBlockedPost,
   isNotFoundPost,
   isUnavailablePost,
+  isEmptyPost,
   isMutedPost,
   getReplyRootFromPost,
   doHideAuthorOnUnauthenticated,
@@ -353,21 +354,22 @@ class PostThreadView extends View {
 
     function threadTemplate({ postThread, currentUser }) {
       try {
+        const mainPost = isEmptyPost(postThread) ? postThread : postThread.post;
         const parents = flattenParents(postThread);
         // A post might still have a parent even if it isn't loaded by the appview -
         // this happens if the client has malformed reply refs.
-        const replyParent = postThread.post?.record?.reply?.parent;
+        const replyParent = mainPost?.record?.reply?.parent;
         const hasParent = !!replyParent;
         // Don't set this to true unless the full post thread has loaded
         const hasBrokenReplyRef =
           hasParent && !postThread.__isPrefill && parents.length === 0;
-        const root = getReplyRootFromPost(postThread.post);
+        const root = getReplyRootFromPost(mainPost);
         const replies = postThread.replies;
-        const postAuthor = postThread.post?.author;
+        const postAuthor = mainPost?.author;
         const hiddenUnauthenticated =
           !isAuthenticated &&
-          postThread.post?.author &&
-          doHideAuthorOnUnauthenticated(postThread.post.author);
+          mainPost?.author &&
+          doHideAuthorOnUnauthenticated(mainPost.author);
         return html`
           <div class="post-thread">
             <plugin-slot
@@ -417,11 +419,11 @@ class PostThreadView extends View {
             ${hiddenUnauthenticated
               ? noUnauthenticatedLargePostTemplate()
               : largePostTemplate({
-                  post: postThread.post,
+                  post: mainPost,
                   currentUser,
                   isAuthenticated,
                   pluginService,
-                  isUserPost: currentUser?.did === postThread.post?.author?.did,
+                  isUserPost: currentUser?.did === mainPost?.author?.did,
                   postInteractionHandler,
                   afterHide: () => {
                     // if the main post is hidden, go back to the previous page
@@ -432,7 +434,7 @@ class PostThreadView extends View {
                     router.back();
                   },
                   onClickReply: async () => {
-                    await handleClickReply(postThread.post, root, currentUser);
+                    await handleClickReply(mainPost, root, currentUser);
                   },
                   replyContext: hasParent ? "reply" : null,
                 })}
@@ -441,16 +443,12 @@ class PostThreadView extends View {
               context-uri=${postUri}
               .pluginService=${pluginService}
             ></plugin-slot>
-            ${isAuthenticated && currentUser && canReplyToPost(postThread.post)
+            ${isAuthenticated && currentUser && canReplyToPost(mainPost)
               ? html`
                   <div
                     class="post-thread-reply-prompt"
                     @click=${async () => {
-                      await handleClickReply(
-                        postThread.post,
-                        root,
-                        currentUser,
-                      );
+                      await handleClickReply(mainPost, root, currentUser);
                     }}
                   >
                     <div class="post-thread-reply-prompt-inner">
@@ -476,7 +474,7 @@ class PostThreadView extends View {
                   currentUser,
                 });
               }
-              const numReplies = postThread.post.replyCount;
+              const numReplies = mainPost?.replyCount;
               if (numReplies > 0) {
                 return repliesSkeletonTemplate({ numReplies });
               }

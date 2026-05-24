@@ -12,6 +12,7 @@ import {
   replaceBlockedQuote,
   createEmbedFromPost,
   isBlockedPost,
+  isEmptyPost,
   isPostView,
   getQuotedPost,
   getLastInteractionTimestamp,
@@ -104,7 +105,7 @@ export class Selectors {
     if (!postThread || !postThreadOther) {
       return null;
     }
-    if (isBlockedPost(postThread) && isBlockingUser(postThread)) {
+    if (isEmptyPost(postThread)) {
       return postThread;
     }
     const hiddenReplyUris = postThreadOther.map((item) => item.uri);
@@ -121,7 +122,7 @@ export class Selectors {
   }
 
   hydratePostThread(postThread, hiddenReplyUris) {
-    if (isBlockedPost(postThread) && isBlockingUser(postThread)) {
+    if (isEmptyPost(postThread)) {
       return postThread;
     }
     const hydratedPostThread = {
