@@ -13,6 +13,9 @@ class PluginSlot extends Component {
     if (!this.pluginService) {
       throw new Error("pluginService is required");
     }
+    if (!this.renderFunc) {
+      throw new Error("renderFunc is required");
+    }
     this._pluginRoots = new Map();
     this._currentRequest = null;
     this._onSlotChange = ({ name }) => {
@@ -34,7 +37,7 @@ class PluginSlot extends Component {
 
   // TODO - automatic?
   static get observedAttributes() {
-    return ["name", "context-uri"];
+    return ["name", "context-uri", "key"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -95,7 +98,9 @@ class PluginSlot extends Component {
       let state = this._pluginRoots.get(entry.pluginId);
       if (!state) {
         const renderer = this.pluginService.getRenderer(entry.pluginId);
-        state = { root: renderer.createRoot() };
+        state = {
+          root: renderer.createRoot({ handlerRenderFunc: this.renderFunc }),
+        };
         this._pluginRoots.set(entry.pluginId, state);
       }
       const element = state.root.render(node);

@@ -1,3 +1,4 @@
+import { noop } from "/js/utils.js";
 import { showExternalLinkWarningModal } from "/js/modals.js";
 import "/js/components/toggle-switch.js";
 import "/js/components/plugin-profiles-list.js";
@@ -126,7 +127,7 @@ export class PluginRenderer {
     this.renderContext = renderContext;
   }
 
-  createRoot({ handlerRenderFunc = null } = {}) {
+  createRoot({ handlerRenderFunc = noop } = {}) {
     const renderer = this;
     const pluginId = this.pluginId;
     let postInteractionHandler = null;

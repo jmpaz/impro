@@ -13,9 +13,10 @@ async function flushMicrotasks() {
 
 // Minimal stub renderer that just builds a <div> reflecting node.text so
 // tests can assert on the rendered output without pulling in PluginRenderer.
-function makeRenderer(pluginId) {
+function makeRenderer(pluginId, { onCreateRoot } = {}) {
   return {
-    createRoot() {
+    createRoot(options = {}) {
+      onCreateRoot?.(options);
       let element = null;
       return {
         render(node) {
@@ -29,7 +30,7 @@ function makeRenderer(pluginId) {
   };
 }
 
-function makePluginService({ entries = {} } = {}) {
+function makePluginService({ entries = {}, onCreateRoot } = {}) {
   const listeners = { slotRegistered: [], slotUnregistered: [] };
   return {
     _entries: entries,
@@ -48,14 +49,15 @@ function makePluginService({ entries = {} } = {}) {
       return [...(this._entries[name] ?? [])];
     },
     getRenderer(pluginId) {
-      return makeRenderer(pluginId);
+      return makeRenderer(pluginId, { onCreateRoot });
     },
   };
 }
 
-function makeSlot({ pluginService, name, context = {} }) {
+function makeSlot({ pluginService, name, context = {}, renderFunc }) {
   const element = document.createElement("plugin-slot");
   element.pluginService = pluginService;
+  element.renderFunc = renderFunc ?? (() => {});
   element.setAttribute("name", name);
   for (const [key, value] of Object.entries(context)) {
     element.setAttribute(`context-${key}`, value);
@@ -252,6 +254,69 @@ t.describe("PluginSlot - dynamic updates", (it) => {
     await flushMicrotasks();
     assertEquals(captured, ["at://one", "at://two"]);
     assertEquals(slot.children[0].textContent, "at://two");
+  });
+});
+
+t.describe("PluginSlot - renderFunc", (it) => {
+  it("throws when renderFunc is not set", () => {
+    const element = document.createElement("plugin-slot");
+    element.pluginService = makePluginService();
+    element.setAttribute("name", "x");
+    let caught = null;
+    try {
+      element.connectedCallback();
+    } catch (error) {
+      caught = error;
+    }
+    assert(caught instanceof Error);
+    assertEquals(caught.message, "renderFunc is required");
+  });
+
+  it("passes renderFunc to the renderer as handlerRenderFunc", async () => {
+    const createRootCalls = [];
+    const renderFunc = () => {};
+    const pluginService = makePluginService({
+      entries: {
+        x: [
+          {
+            pluginId: "alpha",
+            invoke: async () => ({ tag: "div", text: "A" }),
+          },
+        ],
+      },
+      onCreateRoot: (options) => createRootCalls.push(options),
+    });
+    const slot = makeSlot({ pluginService, name: "x", renderFunc });
+    document.body.appendChild(slot);
+    await flushMicrotasks();
+    assertEquals(createRootCalls.length, 1);
+    assertEquals(createRootCalls[0].handlerRenderFunc, renderFunc);
+  });
+
+  it("re-renders when the key attribute changes", async () => {
+    let callCount = 0;
+    const pluginService = makePluginService({
+      entries: {
+        x: [
+          {
+            pluginId: "alpha",
+            invoke: async () => {
+              callCount += 1;
+              return { tag: "div", text: "A" };
+            },
+          },
+        ],
+      },
+    });
+    const slot = makeSlot({ pluginService, name: "x" });
+    slot.setAttribute("key", "k1");
+    document.body.appendChild(slot);
+    await flushMicrotasks();
+    assertEquals(callCount, 1);
+
+    slot.setAttribute("key", "k2");
+    await flushMicrotasks();
+    assertEquals(callCount, 2);
   });
 });
 

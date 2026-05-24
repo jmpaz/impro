@@ -60,6 +60,13 @@ class PostThreadView extends View {
       },
     );
 
+    let slotKey = Math.random().toString(36);
+
+    function pluginRenderFunc() {
+      slotKey = Math.random().toString(36);
+      renderPage();
+    }
+
     function postThreadErrorTemplate({ error }) {
       if (
         error instanceof ApiError &&
@@ -254,11 +261,15 @@ class PostThreadView extends View {
                 name="post-thread-view:replies-empty"
                 context-uri=${postUri}
                 .pluginService=${pluginService}
+                .renderFunc=${pluginRenderFunc}
+                key=${slotKey}
               ></plugin-slot>`
             : html`<plugin-slot
                   name="post-thread-view:replies-header"
                   context-uri=${postUri}
                   .pluginService=${pluginService}
+                  .renderFunc=${pluginRenderFunc}
+                  key=${slotKey}
                 ></plugin-slot>
                 <div class="post-thread-reply-chains">
                   ${replyChains.map((replyChain, i) =>
@@ -293,6 +304,8 @@ class PostThreadView extends View {
             name="post-thread-view:after-replies"
             context-uri=${postUri}
             .pluginService=${pluginService}
+            .renderFunc=${pluginRenderFunc}
+            key=${slotKey}
           ></plugin-slot>
           <div class="post-thread-extra-space"></div>
         </div>
@@ -376,6 +389,8 @@ class PostThreadView extends View {
               name="post-thread-view:top"
               context-uri=${postUri}
               .pluginService=${pluginService}
+              .renderFunc=${pluginRenderFunc}
+              key=${slotKey}
             ></plugin-slot>
             ${parents.map((parent, i) => {
               const parentPost = parent.post ? parent.post : parent;
@@ -415,6 +430,8 @@ class PostThreadView extends View {
               name="post-thread-view:before-main"
               context-uri=${postUri}
               .pluginService=${pluginService}
+              .renderFunc=${pluginRenderFunc}
+              key=${slotKey}
             ></plugin-slot>
             ${hiddenUnauthenticated
               ? noUnauthenticatedLargePostTemplate()
@@ -442,6 +459,8 @@ class PostThreadView extends View {
               name="post-thread-view:after-main"
               context-uri=${postUri}
               .pluginService=${pluginService}
+              .renderFunc=${pluginRenderFunc}
+              key=${slotKey}
             ></plugin-slot>
             ${isAuthenticated && currentUser && canReplyToPost(mainPost)
               ? html`
