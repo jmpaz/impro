@@ -1465,6 +1465,7 @@ button.sidebar-plugin-nav-item {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  padding-bottom: calc(var(--footer-height) + var(--safe-area-inset-bottom));
 }
 
 .feed > div {
@@ -1499,10 +1500,7 @@ button.sidebar-plugin-nav-item {
 }
 
 .feed-end-message {
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 32px;
-  padding-bottom: 100px;
+  padding: 32px 16px 0;
   color: var(--text-color-muted);
   font-size: 14px;
   text-align: center;
