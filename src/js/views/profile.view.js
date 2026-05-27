@@ -49,15 +49,11 @@ class ProfileView extends View {
         feedType: "media",
         name: "Media",
       },
-    ].filter(Boolean);
-
-    const currentUserAuthorFeeds = [
-      ...defaultAuthorFeeds,
       {
         feedType: "likes",
         name: "Likes",
       },
-    ];
+    ].filter(Boolean);
 
     const state = {
       activeTab: "posts", // will be either a feed type or "labeler-settings"
@@ -270,9 +266,7 @@ class ProfileView extends View {
           profile.did,
         );
         const isCurrentUser = currentUser?.did === profile.did;
-        let authorFeedsToShow = isCurrentUser
-          ? currentUserAuthorFeeds
-          : defaultAuthorFeeds;
+        let authorFeedsToShow = defaultAuthorFeeds;
         // Hide media feed for labelers. TODO: prevent prefetching
         if (isLabeler) {
           authorFeedsToShow = authorFeedsToShow.filter(
@@ -541,7 +535,8 @@ class ProfileView extends View {
 
     async function preloadHiddenFeeds() {
       const feedsToPreload = defaultAuthorFeeds.filter(
-        (feed) => feed.feedType !== state.activeTab,
+        (feed) =>
+          feed.feedType !== state.activeTab && feed.feedType !== "likes",
       );
       for (const feed of feedsToPreload) {
         await dataLayer.requests.loadNextAuthorFeedPage(

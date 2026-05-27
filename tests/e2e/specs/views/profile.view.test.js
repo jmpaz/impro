@@ -271,7 +271,9 @@ test.describe("Profile view", () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test("should show Posts, Replies, and Media tabs", async ({ page }) => {
+  test("should show Posts, Replies, Media, and Likes tabs", async ({
+    page,
+  }) => {
     const mockServer = new MockServer();
     mockServer.addProfile(otherUser);
     await mockServer.setup(page);
@@ -280,7 +282,7 @@ test.describe("Profile view", () => {
 
     const view = page.locator("#profile-view");
     const tabBar = view.locator(".tab-bar");
-    await expect(tabBar.locator(".tab-bar-button")).toHaveCount(3, {
+    await expect(tabBar.locator(".tab-bar-button")).toHaveCount(4, {
       timeout: 10000,
     });
     await expect(tabBar.locator(".tab-bar-button").nth(0)).toContainText(
@@ -291,6 +293,9 @@ test.describe("Profile view", () => {
     );
     await expect(tabBar.locator(".tab-bar-button").nth(2)).toContainText(
       "Media",
+    );
+    await expect(tabBar.locator(".tab-bar-button").nth(3)).toContainText(
+      "Likes",
     );
   });
 
@@ -306,25 +311,26 @@ test.describe("Profile view", () => {
     const view = page.locator("#profile-view");
     const tabBar = view.locator(".tab-bar");
 
-    // Posts tab should be active by default
     await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
       /active/,
       { timeout: 10000 },
     );
 
-    // Click Replies tab
     await tabBar.locator('[data-testid="tab-replies"]').click();
     await expect(tabBar.locator('[data-testid="tab-replies"]')).toHaveClass(
       /active/,
     );
 
-    // Click Media tab
     await tabBar.locator('[data-testid="tab-media"]').click();
     await expect(tabBar.locator('[data-testid="tab-media"]')).toHaveClass(
       /active/,
     );
 
-    // Click back to Posts tab
+    await tabBar.locator('[data-testid="tab-likes"]').click();
+    await expect(tabBar.locator('[data-testid="tab-likes"]')).toHaveClass(
+      /active/,
+    );
+
     await tabBar.locator('[data-testid="tab-posts"]').click();
     await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
       /active/,
@@ -354,6 +360,47 @@ test.describe("Profile view", () => {
     await expect(tabBar.locator(".tab-bar-button").nth(3)).toContainText(
       "Likes",
     );
+  });
+
+  test("should show public liked posts on other profiles", async ({ page }) => {
+    const olderLikedPost = createPost({
+      uri: "at://did:plc:likedauthor/app.bsky.feed.post/liked1",
+      text: "Older publicly liked post",
+      authorHandle: "likedauthor.bsky.social",
+      authorDisplayName: "Liked Author",
+    });
+    const newerLikedPost = createPost({
+      uri: "at://did:plc:likedauthor/app.bsky.feed.post/liked2",
+      text: "Newer publicly liked post",
+      authorHandle: "likedauthor.bsky.social",
+      authorDisplayName: "Liked Author",
+    });
+
+    const mockServer = new MockServer();
+    mockServer.addProfile(otherUser);
+    mockServer.addPublicActorLikes(otherUser.did, [
+      {
+        post: olderLikedPost,
+        createdAt: "2025-01-01T00:00:00.000Z",
+      },
+      {
+        post: newerLikedPost,
+        createdAt: "2025-01-02T00:00:00.000Z",
+      },
+    ]);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${otherUser.did}`);
+
+    const view = page.locator("#profile-view");
+    await view.locator('[data-testid="tab-likes"]').click();
+    const feedItems = view.locator('[data-testid="feed-item"]');
+
+    await expect(feedItems).toHaveCount(2, {
+      timeout: 10000,
+    });
+    await expect(feedItems.nth(0)).toContainText("Newer publicly liked post");
+    await expect(feedItems.nth(1)).toContainText("Older publicly liked post");
   });
 
   test("should not show follow or chat buttons on own profile", async ({
@@ -1747,7 +1794,7 @@ test.describe("Profile view", () => {
   });
 
   test.describe("Logged-out behavior", () => {
-    test("should display Posts and Media tabs only (no Replies or Likes)", async ({
+    test("should display Posts, Media, and Likes tabs only", async ({
       page,
     }) => {
       const mockServer = new MockServer();
@@ -1758,7 +1805,7 @@ test.describe("Profile view", () => {
 
       const view = page.locator("#profile-view");
       const tabBar = view.locator(".tab-bar");
-      await expect(tabBar.locator(".tab-bar-button")).toHaveCount(2, {
+      await expect(tabBar.locator(".tab-bar-button")).toHaveCount(3, {
         timeout: 10000,
       });
       await expect(tabBar.locator(".tab-bar-button").nth(0)).toContainText(
@@ -1766,6 +1813,9 @@ test.describe("Profile view", () => {
       );
       await expect(tabBar.locator(".tab-bar-button").nth(1)).toContainText(
         "Media",
+      );
+      await expect(tabBar.locator(".tab-bar-button").nth(2)).toContainText(
+        "Likes",
       );
     });
 

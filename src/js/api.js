@@ -1,6 +1,7 @@
 import { parseUri } from "/js/dataHelpers.js";
 import { RefreshTokenError, auth } from "/js/auth.js";
 import { TokenRefreshError as OauthRefreshTokenError } from "/js/oauth.js";
+import { getServiceEndpointFromDidDoc, resolveDid } from "/js/atproto.js";
 import { batch, buildQueryString, getCurrentTimestamp } from "/js/utils.js";
 import { linkToLogin } from "/js/navigation.js";
 import {
@@ -33,6 +34,15 @@ class PublicSession {
   get did() {
     throw new Error("Public session does not have a DID");
   }
+}
+
+function getRecordCreatedAtTimestamp(record) {
+  const createdAt = record.value?.createdAt;
+  if (typeof createdAt !== "string") {
+    return 0;
+  }
+  const timestamp = Date.parse(createdAt);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
 export class Api {
@@ -483,6 +493,48 @@ export class Api {
       },
     });
     return res.data;
+  }
+
+  async getPublicActorLikes(
+    did,
+    { limit = 31, cursor = "", labelers = [] } = {},
+  ) {
+    const didDoc = await resolveDid(did);
+    const pdsUrl = getServiceEndpointFromDidDoc(didDoc);
+    const query = {
+      repo: did,
+      collection: "app.bsky.feed.like",
+      limit,
+      reverse: false,
+    };
+    if (cursor) {
+      query.cursor = cursor;
+    }
+    const recordsUrl = new URL(
+      "/xrpc/com.atproto.repo.listRecords",
+      pdsUrl,
+    ).toString();
+    const recordsRes = await this.serviceRequest(recordsUrl, { query });
+    const records = (recordsRes.data.records ?? []).toSorted(
+      (a, b) => getRecordCreatedAtTimestamp(b) - getRecordCreatedAtTimestamp(a),
+    );
+    const postUris = records
+      .map((record) => record.value?.subject?.uri)
+      .filter((uri) => typeof uri === "string");
+
+    if (postUris.length === 0) {
+      return { feed: [], cursor: recordsRes.data.cursor };
+    }
+
+    const posts = await this.getPosts(postUris, { labelers });
+    const postsByUri = new Map(posts.map((post) => [post.uri, post]));
+    return {
+      feed: postUris
+        .map((uri) => postsByUri.get(uri))
+        .filter(Boolean)
+        .map((post) => ({ post })),
+      cursor: recordsRes.data.cursor,
+    };
   }
 
   async getPreferences() {

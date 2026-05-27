@@ -754,6 +754,69 @@ t.describe("getActorLikes", (it) => {
   });
 });
 
+t.describe("getPublicActorLikes", (it) => {
+  it("should list public like records from the actor PDS and hydrate posts", async () => {
+    const originalFetch = globalThis.fetch;
+    const mockFetch = new MockFetch();
+    globalThis.fetch = mockFetch;
+    mockFetch.__interceptJson("https://example.com/.well-known/did.json", {
+      service: [
+        {
+          id: "#atproto_pds",
+          serviceEndpoint: "https://pds.example.com",
+        },
+      ],
+    });
+    mockFetch.__interceptJson(
+      "https://pds.example.com/xrpc/com.atproto.repo.listRecords",
+      {
+        records: [
+          {
+            value: {
+              createdAt: "2025-01-01T00:00:00.000Z",
+              subject: { uri: "at://post/older" },
+            },
+          },
+          {
+            value: {
+              createdAt: "2025-01-02T00:00:00.000Z",
+              subject: { uri: "at://post/newer" },
+            },
+          },
+        ],
+        cursor: "next",
+      },
+    );
+    const session = createMockSession({
+      posts: [{ uri: "at://post/older" }, { uri: "at://post/newer" }],
+    });
+    const api = new Api(session);
+
+    try {
+      const result = await api.getPublicActorLikes("did:web:example.com", {
+        limit: 12,
+        cursor: "page2",
+      });
+
+      const recordsCall = mockFetch.calls.find((call) =>
+        call.url.includes("com.atproto.repo.listRecords"),
+      );
+      assert(recordsCall.url.includes("repo=did%3Aweb%3Aexample.com"));
+      assert(recordsCall.url.includes("collection=app.bsky.feed.like"));
+      assert(recordsCall.url.includes("limit=12"));
+      assert(recordsCall.url.includes("reverse=false"));
+      assert(recordsCall.url.includes("cursor=page2"));
+      assertEquals(
+        result.feed.map((item) => item.post.uri),
+        ["at://post/newer", "at://post/older"],
+      );
+      assertEquals(result.cursor, "next");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+
 t.describe("getPreferences", (it) => {
   it("should fetch preferences", async () => {
     const session = createMockSession({

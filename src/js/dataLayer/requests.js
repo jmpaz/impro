@@ -605,7 +605,12 @@ export class Requests {
 
     // Handle likes feed separately since it uses a different API endpoint
     if (feedType === "likes") {
-      feed = await this.api.getActorLikes(did, params);
+      const currentUser = this.dataStore.getCurrentUser();
+      const canUseActorLikesEndpoint =
+        this.api.isAuthenticated && currentUser?.did === did;
+      feed = canUseActorLikesEndpoint
+        ? await this.api.getActorLikes(did, params)
+        : await this.api.getPublicActorLikes(did, params);
     } else {
       // set params based on feed type
       switch (feedType) {

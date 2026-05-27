@@ -41,6 +41,7 @@ export class MockServer {
     this.profileFollowers = new Map();
     this.profileFollows = new Map();
     this.profiles = new Map();
+    this.publicActorLikes = new Map();
     this.savedFeedUris = [];
     this.actorFeeds = new Map();
     this.searchFeedGenerators = [];
@@ -158,6 +159,22 @@ export class MockServer {
     this.profiles.set(profile.did, profile);
   }
 
+  addPublicActorLikes(did, posts) {
+    const existing = this.publicActorLikes.get(did) || [];
+    const likes = posts.map((post, index) =>
+      post.post
+        ? post
+        : {
+            post,
+            createdAt: new Date(
+              Date.UTC(2025, 0, 1, 0, 0, existing.length + index),
+            ).toISOString(),
+          },
+    );
+    this.publicActorLikes.set(did, [...existing, ...likes]);
+    this.addPosts(likes.map((like) => like.post));
+  }
+
   addConvos(convos) {
     for (const convo of convos) {
       if (!this.convoMessages.has(convo.id)) {
@@ -263,6 +280,26 @@ export class MockServer {
     await page.route("**/.well-known/atproto-did*", (route) =>
       route.fulfill({ status: 404, body: "Not Found" }),
     );
+
+    await page.route("**/plc.directory/*", (route) => {
+      const did = decodeURIComponent(
+        new URL(route.request().url()).pathname.slice(1),
+      );
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: did,
+          service: [
+            {
+              id: "#atproto_pds",
+              type: "AtprotoPersonalDataServer",
+              serviceEndpoint: "https://pds.test",
+            },
+          ],
+        }),
+      });
+    });
 
     await page.route("**/xrpc/blue.microcosm.links.getBacklinks*", (route) =>
       route.fulfill({
@@ -700,6 +737,50 @@ export class MockServer {
         contentType: "application/json",
         body: JSON.stringify({
           feed: posts.map((post) => ({ post })),
+          cursor: nextCursor,
+        }),
+      });
+    });
+
+    await page.route("**/xrpc/com.atproto.repo.listRecords*", (route) => {
+      const url = new URL(route.request().url());
+      const repo = url.searchParams.get("repo");
+      const collection = url.searchParams.get("collection");
+      const cursor = url.searchParams.get("cursor") || "";
+      const limit = parseInt(url.searchParams.get("limit") || "0", 10);
+      const reverse = url.searchParams.get("reverse") === "true";
+      const offset = cursor ? parseInt(cursor, 10) : 0;
+      const allLikes =
+        collection === "app.bsky.feed.like"
+          ? this.publicActorLikes.get(repo) || []
+          : [];
+      const sortedLikes = reverse ? allLikes : allLikes.toReversed();
+
+      let likes, nextCursor;
+      if (limit) {
+        likes = sortedLikes.slice(offset, offset + limit);
+        nextCursor =
+          offset + limit < sortedLikes.length ? String(offset + limit) : "";
+      } else {
+        likes = sortedLikes;
+        nextCursor = "";
+      }
+
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          records: likes.map((like, index) => ({
+            uri: `at://${repo}/app.bsky.feed.like/test-${offset + index}`,
+            value: {
+              $type: "app.bsky.feed.like",
+              createdAt: like.createdAt,
+              subject: {
+                uri: like.post.uri,
+                cid: like.post.cid,
+              },
+            },
+          })),
           cursor: nextCursor,
         }),
       });

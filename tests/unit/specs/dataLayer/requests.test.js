@@ -770,12 +770,18 @@ t.describe("loadNextAuthorFeedPage", (it) => {
     assertEquals(capturedParams.includePins, false);
   });
 
-  it("should call getActorLikes for likes feedType", async () => {
+  it("should call getActorLikes for current-user likes feedType", async () => {
     let actorLikesCalled = false;
+    let publicActorLikesCalled = false;
     let authorFeedCalled = false;
     const mockApi = {
+      isAuthenticated: true,
       getActorLikes: async () => {
         actorLikesCalled = true;
+        return { feed: [], cursor: null };
+      },
+      getPublicActorLikes: async () => {
+        publicActorLikesCalled = true;
         return { feed: [], cursor: null };
       },
       getAuthorFeed: async () => {
@@ -783,12 +789,58 @@ t.describe("loadNextAuthorFeedPage", (it) => {
         return { feed: [], cursor: null };
       },
     };
-    const requests = makeRequests(mockApi);
+    const dataStore = new DataStore();
+    dataStore.setCurrentUser({ did });
+    const requests = makeRequests(mockApi, dataStore);
 
     await requests.loadNextAuthorFeedPage(did, "likes");
 
     assertEquals(actorLikesCalled, true);
+    assertEquals(publicActorLikesCalled, false);
     assertEquals(authorFeedCalled, false);
+  });
+
+  it("should call getPublicActorLikes for other-user likes feedType", async () => {
+    let actorLikesCalled = false;
+    let publicActorLikesCalled = false;
+    const mockApi = {
+      isAuthenticated: true,
+      getActorLikes: async () => {
+        actorLikesCalled = true;
+        return { feed: [], cursor: null };
+      },
+      getPublicActorLikes: async () => {
+        publicActorLikesCalled = true;
+        return { feed: [], cursor: null };
+      },
+    };
+    const dataStore = new DataStore();
+    dataStore.setCurrentUser({ did: "did:plc:currentuser" });
+    const requests = makeRequests(mockApi, dataStore);
+
+    await requests.loadNextAuthorFeedPage(did, "likes");
+
+    assertEquals(actorLikesCalled, false);
+    assertEquals(publicActorLikesCalled, true);
+  });
+
+  it("should call getPublicActorLikes for logged-out likes feedType", async () => {
+    let publicActorLikesCalled = false;
+    const mockApi = {
+      isAuthenticated: false,
+      getActorLikes: async () => {
+        throw new Error("getActorLikes should not be called");
+      },
+      getPublicActorLikes: async () => {
+        publicActorLikesCalled = true;
+        return { feed: [], cursor: null };
+      },
+    };
+    const requests = makeRequests(mockApi);
+
+    await requests.loadNextAuthorFeedPage(did, "likes");
+
+    assertEquals(publicActorLikesCalled, true);
   });
 
   it("should append to existing feed", async () => {
