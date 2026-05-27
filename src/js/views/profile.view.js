@@ -56,13 +56,12 @@ class ProfileView extends View {
     ].filter(Boolean);
 
     const state = {
-      activeTab: "posts", // will be either a feed type or "labeler-settings"
+      activeTab: "posts",
       richTextProfileDescription: null,
     };
 
     const { handleOrDid } = params;
     let profileDid = null;
-    // If no handle or did is provided, use the current user
     if (!handleOrDid) {
       const currentUser = await dataLayer.declarative.ensureCurrentUser();
       profileDid = currentUser.did;
@@ -113,6 +112,76 @@ class ProfileView extends View {
 
     const tabScrollState = new Map();
 
+    function getRequestedTab() {
+      return new URLSearchParams(window.location.search).get("tab");
+    }
+
+    function setTabQueryParam(tab) {
+      const url = new URL(window.location.href);
+      if (tab === "posts") {
+        url.searchParams.delete("tab");
+      } else {
+        url.searchParams.set("tab", tab);
+      }
+      window.history.replaceState(
+        window.history.state,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+    }
+
+    function getDefaultTab(isLabeler) {
+      return isLabeler ? "labeler-settings" : "posts";
+    }
+
+    function getAuthorFeedsToShow(profile, isLabeler) {
+      let authorFeedsToShow = defaultAuthorFeeds;
+      if (isLabeler) {
+        authorFeedsToShow = authorFeedsToShow.filter(
+          (feed) => feed.feedType !== "media",
+        );
+      }
+      const feedGenCount = profile.associated?.feedgens || 0;
+      if (feedGenCount > 0) {
+        authorFeedsToShow = [
+          ...authorFeedsToShow,
+          { feedType: "feeds", name: "Feeds" },
+        ];
+      }
+      return authorFeedsToShow;
+    }
+
+    function getTabsToShow(profile, isLabeler) {
+      return [
+        ...(isLabeler ? [{ value: "labeler-settings", label: "Labels" }] : []),
+        ...getAuthorFeedsToShow(profile, isLabeler).map((feedInfo) => ({
+          value: feedInfo.feedType,
+          label: feedInfo.name,
+        })),
+      ];
+    }
+
+    function applyRequestedTab(profile, isLabeler) {
+      const requestedTab = getRequestedTab();
+      const isBlocked =
+        !!profile.viewer?.blocking || !!profile.viewer?.blockedBy;
+      const isUnavailable =
+        !isAuthenticated && doHideAuthorOnUnauthenticated(profile);
+      const availableTabs =
+        isBlocked || isUnavailable
+          ? []
+          : getTabsToShow(profile, isLabeler).map((tab) => tab.value);
+      if (requestedTab && availableTabs.includes(requestedTab)) {
+        state.activeTab = requestedTab;
+        setTabQueryParam(requestedTab);
+        return;
+      }
+      state.activeTab = getDefaultTab(isLabeler);
+      if (requestedTab === "posts") {
+        setTabQueryParam(requestedTab);
+      }
+    }
+
     async function scrollAndReloadFeed() {
       if (window.scrollY > 0) {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -122,6 +191,7 @@ class ProfileView extends View {
     }
 
     async function handleTabClick(tab) {
+      setTabQueryParam(tab);
       if (tab === state.activeTab) {
         if (tab === "feeds") {
           scrollAndReloadActorFeeds();
@@ -130,18 +200,14 @@ class ProfileView extends View {
         }
         return;
       }
-      // Save scroll state
       tabScrollState.set(state.activeTab, window.scrollY);
-      // switch tab
       state.activeTab = tab;
       renderPage();
-      // Restore or reset scroll
       if (tabScrollState.has(tab)) {
         window.scrollTo(0, tabScrollState.get(tab));
       } else {
         window.scrollTo(0, 0);
       }
-      // Load feed if needed
       if (tab === "feeds") {
         if (!dataLayer.selectors.getActorFeeds(profileDid)) {
           await loadActorFeeds();
@@ -266,20 +332,7 @@ class ProfileView extends View {
           profile.did,
         );
         const isCurrentUser = currentUser?.did === profile.did;
-        let authorFeedsToShow = defaultAuthorFeeds;
-        // Hide media feed for labelers. TODO: prevent prefetching
-        if (isLabeler) {
-          authorFeedsToShow = authorFeedsToShow.filter(
-            (feed) => feed.feedType !== "media",
-          );
-        }
-        const feedGenCount = profile.associated?.feedgens || 0;
-        if (feedGenCount > 0) {
-          authorFeedsToShow = [
-            ...authorFeedsToShow,
-            { feedType: "feeds", name: "Feeds" },
-          ];
-        }
+        const authorFeedsToShow = getAuthorFeedsToShow(profile, isLabeler);
         let isDefaultLabeler = profile.did === BSKY_LABELER_DID;
         let isSubscribed = false;
         let labelerSettings = null;
@@ -358,15 +411,7 @@ class ProfileView extends View {
               : html`
                   <div class="profile-tab-bar" data-scroll-lock-sticky>
                     ${tabBarTemplate({
-                      tabs: [
-                        ...(isLabeler
-                          ? [{ value: "labeler-settings", label: "Labels" }]
-                          : []),
-                        ...authorFeedsToShow.map((feedInfo) => ({
-                          value: feedInfo.feedType,
-                          label: feedInfo.name,
-                        })),
-                      ],
+                      tabs: getTabsToShow(profile, isLabeler),
                       activeTab: state.activeTab,
                       onTabClick: handleTabClick,
                     })}
@@ -526,6 +571,14 @@ class ProfileView extends View {
       renderPage();
     }
 
+    async function loadActiveTab() {
+      if (state.activeTab === "feeds") {
+        await loadActorFeeds();
+      } else {
+        await loadAuthorFeed();
+      }
+    }
+
     async function scrollAndReloadActorFeeds() {
       if (window.scrollY > 0) {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -549,7 +602,6 @@ class ProfileView extends View {
       }
     }
 
-    // This is async because it needs to resolve mentions
     async function loadProfileDescription() {
       const profile = dataLayer.base.getProfile(profileDid);
       if (!profile?.description) {
@@ -576,22 +628,20 @@ class ProfileView extends View {
         return;
       }
 
-      // Set active tab and load labeler info if this is a labeler profile
       const isLabeler = profile && isLabelerProfile(profile);
       if (isLabeler) {
-        state.activeTab = "labeler-settings";
         dataLayer.requests.loadLabelerInfo(profile.did).then(() => {
           renderPage();
         });
       }
+      applyRequestedTab(profile, isLabeler);
 
       await loadProfileDescription();
       renderPage();
       if (!profile.viewer?.blocking && !profile.viewer?.blockedBy) {
-        loadAuthorFeed();
+        loadActiveTab();
         preloadHiddenFeeds();
       }
-      // Load chat status
       if (
         isAuthenticated &&
         profile.did !== dataLayer.selectors.getCurrentUser()?.did

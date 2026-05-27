@@ -316,25 +316,119 @@ test.describe("Profile view", () => {
       { timeout: 10000 },
     );
 
+    await tabBar.locator('[data-testid="tab-posts"]').click();
+    await expect(page).toHaveURL(`/profile/${otherUser.did}`);
+
     await tabBar.locator('[data-testid="tab-replies"]').click();
     await expect(tabBar.locator('[data-testid="tab-replies"]')).toHaveClass(
       /active/,
     );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=replies`);
 
     await tabBar.locator('[data-testid="tab-media"]').click();
     await expect(tabBar.locator('[data-testid="tab-media"]')).toHaveClass(
       /active/,
     );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=media`);
 
     await tabBar.locator('[data-testid="tab-likes"]').click();
     await expect(tabBar.locator('[data-testid="tab-likes"]')).toHaveClass(
       /active/,
     );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=likes`);
 
     await tabBar.locator('[data-testid="tab-posts"]').click();
     await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
       /active/,
     );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}`);
+  });
+
+  test("should open Likes tab from URL param and update param after tab change", async ({
+    page,
+  }) => {
+    const likedPost = createPost({
+      uri: "at://did:plc:likedauthor/app.bsky.feed.post/liked-param",
+      text: "Liked from a profile tab URL",
+      authorHandle: "likedauthor.bsky.social",
+      authorDisplayName: "Liked Author",
+    });
+    const mockServer = new MockServer();
+    mockServer.addProfile(otherUser);
+    mockServer.addPublicActorLikes(otherUser.did, [likedPost]);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${otherUser.did}?tab=likes`);
+
+    const view = page.locator("#profile-view");
+    const tabBar = view.locator(".tab-bar");
+    await expect(tabBar.locator('[data-testid="tab-likes"]')).toHaveClass(
+      /active/,
+      { timeout: 10000 },
+    );
+    await expect(view.locator('[data-testid="feed-item"]')).toContainText(
+      "Liked from a profile tab URL",
+    );
+
+    await tabBar.locator('[data-testid="tab-media"]').click();
+
+    await expect(tabBar.locator('[data-testid="tab-media"]')).toHaveClass(
+      /active/,
+    );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=media`);
+  });
+
+  test("should ignore invalid profile tab URL param without clearing it", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    mockServer.addProfile(otherUser);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${otherUser.did}?tab=bogus`);
+
+    const view = page.locator("#profile-view");
+    const tabBar = view.locator(".tab-bar");
+    await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
+      /active/,
+      { timeout: 10000 },
+    );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=bogus`);
+  });
+
+  test("should strip Posts tab URL param", async ({ page }) => {
+    const mockServer = new MockServer();
+    mockServer.addProfile(otherUser);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${otherUser.did}?tab=posts`);
+
+    const view = page.locator("#profile-view");
+    const tabBar = view.locator(".tab-bar");
+    await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
+      /active/,
+      { timeout: 10000 },
+    );
+    await expect(page).toHaveURL(`/profile/${otherUser.did}`);
+  });
+
+  test("should ignore unavailable profile tab URL param without clearing it", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    mockServer.addProfile(otherUser);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${otherUser.did}?tab=feeds`);
+
+    const view = page.locator("#profile-view");
+    const tabBar = view.locator(".tab-bar");
+    await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
+      /active/,
+      { timeout: 10000 },
+    );
+    await expect(tabBar.locator('[data-testid="tab-feeds"]')).not.toBeVisible();
+    await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=feeds`);
   });
 
   test("should show Likes tab on own profile", async ({ page }) => {
@@ -1819,6 +1913,27 @@ test.describe("Profile view", () => {
       );
     });
 
+    test("should ignore Replies tab URL param without clearing it", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+
+      await page.goto(`/profile/${otherUser.did}?tab=replies`);
+
+      const view = page.locator("#profile-view");
+      const tabBar = view.locator(".tab-bar");
+      await expect(tabBar.locator('[data-testid="tab-posts"]')).toHaveClass(
+        /active/,
+        { timeout: 10000 },
+      );
+      await expect(
+        tabBar.locator('[data-testid="tab-replies"]'),
+      ).not.toBeVisible();
+      await expect(page).toHaveURL(`/profile/${otherUser.did}?tab=replies`);
+    });
+
     test("should hide follow/block/mute actions", async ({ page }) => {
       const mockServer = new MockServer();
       mockServer.addProfile(otherUser);
@@ -1917,7 +2032,7 @@ test.describe("Profile view", () => {
       mockServer.addProfile(restrictedUser);
       await mockServer.setup(page);
 
-      await page.goto(`/profile/${restrictedUser.did}`);
+      await page.goto(`/profile/${restrictedUser.did}?tab=likes`);
 
       const view = page.locator("#profile-view");
       await expect(view.locator(".error-state h1")).toContainText(
@@ -1927,6 +2042,7 @@ test.describe("Profile view", () => {
       await expect(view.locator(".error-state p")).toContainText(
         "This account has requested that users sign in to view their profile.",
       );
+      await expect(page).toHaveURL(`/profile/${restrictedUser.did}?tab=likes`);
     });
   });
 
@@ -2017,6 +2133,29 @@ test.describe("Profile view", () => {
       await expect(feedsList).toContainText("Trending Topics");
       await expect(feedsList).toContainText("Science Feed");
       await expect(feedsList).toContainText("by @feedcreator.bsky.social");
+    });
+
+    test("should open Feeds tab from URL param", async ({ page }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(userWithFeeds);
+      mockServer.addActorFeeds(userWithFeeds.did, [feed1, feed2]);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${userWithFeeds.did}?tab=feeds`);
+
+      const view = page.locator("#profile-view");
+      const tabBar = view.locator(".tab-bar");
+      await expect(tabBar.locator('[data-testid="tab-feeds"]')).toHaveClass(
+        /active/,
+        { timeout: 10000 },
+      );
+
+      const feedsList = view.locator(".feeds-list");
+      await expect(feedsList.locator(".feeds-list-item")).toHaveCount(2, {
+        timeout: 10000,
+      });
+      await expect(feedsList).toContainText("Trending Topics");
+      await expect(feedsList).toContainText("Science Feed");
     });
 
     test("should navigate to feed detail when clicking a feed generator", async ({
